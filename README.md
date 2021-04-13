@@ -1,2 +1,2 @@
 # slack-deck
-slack wrapper standalone application like twitter deck
+slack wrapper application like twitter deck
