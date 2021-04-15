@@ -1,0 +1,28 @@
+{
+  "name": "slack_deck",
+  "version": "1.0.0",
+  "description": "slack wrapper application like twitter deck",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sim-mokomo/slack_deck.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sim-mokomo/slack_deck/issues"
+  },
+  "homepage": "https://github.com/sim-mokomo/slack_deck#readme",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^4.22.0",
+    "@typescript-eslint/parser": "^4.22.0",
+    "electron": "^12.0.4",
+    "eslint": "^7.24.0",
+    "typescript": "^4.2.4"
+  },
+  "dependencies": {}
+}
