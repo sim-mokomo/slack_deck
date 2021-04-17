@@ -2,7 +2,7 @@
   "name": "slack_deck",
   "version": "1.0.0",
   "description": "slack wrapper application like twitter deck",
-  "main": "index.js",
+  "main": "converted_src/main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -18,6 +18,8 @@
   },
   "homepage": "https://github.com/sim-mokomo/slack_deck#readme",
   "devDependencies": {
+    "@types/electron": "^1.6.10",
+    "@types/node": "^14.14.39",
     "@typescript-eslint/eslint-plugin": "^4.22.0",
     "@typescript-eslint/parser": "^4.22.0",
     "electron": "^12.0.4",
