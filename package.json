@@ -4,27 +4,75 @@
   "description": "slack wrapper application like twitter deck",
   "main": "converted_src/main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "build-win" : "electron-builder --win",
+    "build-mac" : "electron-builder --mac"
+  },
+  "build" : {
+    "appId" : "com.sim_mokomo.slack_deck",
+    "mac" : {
+      "category" : "public.app-category.developer-tools"
+    },
+    "win" : {
+
+    }
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/sim-mokomo/slack_deck.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "sim-mokomo",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/sim-mokomo/slack_deck/issues"
   },
   "homepage": "https://github.com/sim-mokomo/slack_deck#readme",
   "devDependencies": {
+    "@electron-forge/cli": "^6.0.0-beta.54",
+    "@electron-forge/maker-deb": "^6.0.0-beta.54",
+    "@electron-forge/maker-rpm": "^6.0.0-beta.54",
+    "@electron-forge/maker-squirrel": "^6.0.0-beta.54",
+    "@electron-forge/maker-zip": "^6.0.0-beta.54",
     "@types/electron": "^1.6.10",
     "@types/node": "^14.14.39",
     "@typescript-eslint/eslint-plugin": "^4.22.0",
     "@typescript-eslint/parser": "^4.22.0",
     "electron": "^12.0.4",
+    "electron-builder": "^22.10.5",
     "eslint": "^7.24.0",
     "typescript": "^4.2.4"
   },
-  "dependencies": {}
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.0"
+  },
+  "config": {
+    "forge": {
+      "packagerConfig": {},
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "slack_deck"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": [
+            "darwin"
+          ]
+        },
+        {
+          "name": "@electron-forge/maker-deb",
+          "config": {}
+        },
+        {
+          "name": "@electron-forge/maker-rpm",
+          "config": {}
+        }
+      ]
+    }
+  }
 }
