@@ -8,7 +8,10 @@ export class AppConfig {
         if(!fs.existsSync(this.fileName)) {
             return this.save(this.getEmpty())
         }
-        return (<AppConfig>JSON.parse(fs.readFileSync(this.fileName, 'utf-8')))
+        const config = (<AppConfig>JSON.parse(fs.readFileSync(this.fileName, 'utf-8')))
+        const ret : AppConfig = new AppConfig()
+        Object.assign(ret, config)
+        return ret
     }
 
     static save(config : AppConfig) : AppConfig {
@@ -26,7 +29,7 @@ export class AppConfig {
         this.workspaces.push(workspaceConfig)
     }
 
-    addWorkSpaceColumnConfig(workspaceId:string,workspaceColumnConfig:WorkSpaceColumnConfig){
+    addWorkSpaceColumnConfig(workspaceId:string,workspaceColumnConfig:WorkSpaceColumnConfig) : void {
         const index = this.workspaces.findIndex(x => x.workspace_id == workspaceId)
         this.workspaces[index].columns.push(workspaceColumnConfig)
     }
