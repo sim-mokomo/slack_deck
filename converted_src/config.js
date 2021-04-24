@@ -13,7 +13,10 @@ class AppConfig {
         if (!fs_1.default.existsSync(this.fileName)) {
             return this.save(this.getEmpty());
         }
-        return JSON.parse(fs_1.default.readFileSync(this.fileName, 'utf-8'));
+        const config = JSON.parse(fs_1.default.readFileSync(this.fileName, 'utf-8'));
+        const ret = new AppConfig();
+        Object.assign(ret, config);
+        return ret;
     }
     static save(config) {
         fs_1.default.writeFileSync(this.fileName, JSON.stringify(config));
@@ -54,3 +57,4 @@ class WorkSpaceColumnConfig {
     }
 }
 exports.WorkSpaceColumnConfig = WorkSpaceColumnConfig;
+//# sourceMappingURL=config.js.map

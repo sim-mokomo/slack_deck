@@ -43,3 +43,4 @@ electron_1.ipcRenderer.on("add-slack-column-reply", (event, args) => {
     }
 });
 electron_1.ipcRenderer.send("init-index");
+//# sourceMappingURL=index-renderer.js.map
