@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const electron_1 = require("electron");
+const electron = require("electron");
 const addColumnConfirmButtonDOM = document.getElementById("add-column-confirm-button");
 if (addColumnConfirmButtonDOM != null) {
     addColumnConfirmButtonDOM.addEventListener("click", () => {
@@ -38,6 +39,10 @@ electron_1.ipcRenderer.on("add-slack-column-reply", (event, args) => {
             void newWebView.insertCSS(".c-icon_button--light, .c-icon_button--light.c-button-unstyled, .c-icon_button--light:link{visibility: hidden;}");
         });
         newWebView.style.setProperty("width", webViewWidth);
+        newWebView.addEventListener("new-window", (event) => {
+            event.preventDefault();
+            void electron.shell.openExternal(event.url);
+        });
         const webviewContainerDOM = document.getElementsByClassName("webview-container");
         webviewContainerDOM[0].appendChild(newWebViewItem);
     }
