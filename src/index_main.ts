@@ -33,18 +33,7 @@ export class IndexMainProcess{
 
         ipcMain.on('add-column-main-request', (event, arg) => {
             const url : string = (<string>arg)
-            const splitArray = url.split('/')
-            const channelId = splitArray[4]
-            let threadTs = ""
-
-            const lastParameter = splitArray[splitArray.length - 1]
-            if(lastParameter.length > 0){
-                const parameters = lastParameter.split("?")[1]
-                const parameterList = parameters.split("&")
-                if(parameterList.length == 2){
-                    threadTs = parameterList[0].split("=")[1]
-                }
-            }
+            const [channelId, threadTs] = SlackService.parseUrl(url)
 
             const newColumn = new WorkSpaceColumnConfig(channelId, threadTs)
             const appConfig = AppConfig.load()
