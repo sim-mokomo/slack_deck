@@ -25,17 +25,7 @@ class IndexMainProcess {
         });
         electron_1.ipcMain.on('add-column-main-request', (event, arg) => {
             const url = arg;
-            const splitArray = url.split('/');
-            const channelId = splitArray[4];
-            let threadTs = "";
-            const lastParameter = splitArray[splitArray.length - 1];
-            if (lastParameter.length > 0) {
-                const parameters = lastParameter.split("?")[1];
-                const parameterList = parameters.split("&");
-                if (parameterList.length == 2) {
-                    threadTs = parameterList[0].split("=")[1];
-                }
-            }
+            const [channelId, threadTs] = slack_service_1.SlackService.parseUrl(url);
             const newColumn = new config_1.WorkSpaceColumnConfig(channelId, threadTs);
             const appConfig = config_1.AppConfig.load();
             const workSpaceConfig = appConfig.workspaces[0];
@@ -47,3 +37,4 @@ class IndexMainProcess {
     }
 }
 exports.IndexMainProcess = IndexMainProcess;
+//# sourceMappingURL=index_main.js.map

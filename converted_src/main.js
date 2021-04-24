@@ -19,3 +19,4 @@ void electron_2.app.whenReady().then(() => {
         electron_2.app.quit();
     });
 });
+//# sourceMappingURL=main.js.map
