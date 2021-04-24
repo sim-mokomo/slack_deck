@@ -2,15 +2,23 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Hello World!</title>
+    <title>Slack Deck</title>
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+    <link rel="stylesheet" href="css/style.css">
 </head>
-<body style="background: white;">
-<h1>Hello World!</h1>
-<p>
-    We are using Node.js <span id="node-version"></span>,
-    Chromium <span id="chrome-version"></span>,
-    and Electron <span id="electron-version"></span>.
-</p>
+<body>
+    <div class="main">
+        <div id="menu">
+            <p style="min-width: 100px">urlを入力</p>
+            <input type="text", id="add-column-input" name="add-url" required minlength="1" size="60">
+            <button type="button" id="add-column-confirm-button"> add </button>
+        </div>
+        <div class="webview-container">
+        </div>
+
+<!--     NOTE: https://usefuledge.com/electron_typescript_export_is_not_defined.html-->
+        <script> var exports = {}; </script>
+        <script type="text/javascript" src="../converted_src/index-renderer.js"></script>
+    </div>
 </body>
 </html>
