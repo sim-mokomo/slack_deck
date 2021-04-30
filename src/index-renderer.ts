@@ -63,8 +63,9 @@ window.onload = () => {
                 ".p-workspace__primary_view{ visibility: hidden;} .p-workspace__sidebar{ visibility: hidden; }",
                 `.p-workspace-layout .p-workspace__secondary_view { width: ${webViewWidth}; }`,
                 ".p-threads_footer__input_container {min-height: 0px !important}",
-                ".c-icon_button--light, .c-icon_button--light.c-button-unstyled, .c-icon_button--light:link{visibility: hidden;}"
+                "button[data-qa='close_flexpane']{visibility: hidden;}"
             ]
+
             for (const threadCSSContent of threadCSSContents) {
                 void webViewDOM.insertCSS(threadCSSContent)
             }
