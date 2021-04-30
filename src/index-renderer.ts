@@ -17,6 +17,15 @@ window.onload = () => {
         const webViewDivDOM = document.createElement("div")
         webViewDivDOM.setAttribute("class", "webview-item")
 
+        const webViewCloseButtonDOM = document.createElement("button")
+        webViewCloseButtonDOM.setAttribute("type", "button")
+        webViewCloseButtonDOM.innerText = "×"
+        webViewDivDOM.appendChild(webViewCloseButtonDOM)
+
+        webViewCloseButtonDOM.addEventListener("click", ()=>{
+            webviewContainerDOM.removeChild(webViewDivDOM)
+        })
+
         const webViewDOM = document.createElement("webview")
         const webViewWidth = "300px"
         webViewDOM.setAttribute("src", url)
