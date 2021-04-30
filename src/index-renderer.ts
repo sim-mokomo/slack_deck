@@ -1,5 +1,4 @@
 window.onload = () => {
-    const webviewContainerDOM = document.getElementsByClassName("webview-container")[0]
     const addColumnConfirmButtonDOM = document.getElementById("add-column-confirm-button")
     if(addColumnConfirmButtonDOM != null){
         addColumnConfirmButtonDOM.addEventListener("click", () => {
@@ -7,7 +6,6 @@ window.onload = () => {
             if(addColumnInputDOM == null){
                 return
             }
-
             window.api.AddSlackColumnRequest(addColumnInputDOM.value)
             addColumnInputDOM.value = ""
         })
@@ -22,6 +20,7 @@ window.onload = () => {
         webViewCloseButtonDOM.innerText = "×"
         webViewDivDOM.appendChild(webViewCloseButtonDOM)
 
+        const webviewContainerDOM = document.getElementsByClassName("webview-container")[0]
         webViewCloseButtonDOM.addEventListener("click", ()=>{
             let index = 0
             for (const child of webviewContainerDOM.children) {

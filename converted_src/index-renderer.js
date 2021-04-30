@@ -1,6 +1,5 @@
 "use strict";
 window.onload = () => {
-    const webviewContainerDOM = document.getElementsByClassName("webview-container")[0];
     const addColumnConfirmButtonDOM = document.getElementById("add-column-confirm-button");
     if (addColumnConfirmButtonDOM != null) {
         addColumnConfirmButtonDOM.addEventListener("click", () => {
@@ -19,6 +18,7 @@ window.onload = () => {
         webViewCloseButtonDOM.setAttribute("type", "button");
         webViewCloseButtonDOM.innerText = "×";
         webViewDivDOM.appendChild(webViewCloseButtonDOM);
+        const webviewContainerDOM = document.getElementsByClassName("webview-container")[0];
         webViewCloseButtonDOM.addEventListener("click", () => {
             let index = 0;
             for (const child of webviewContainerDOM.children) {
@@ -59,9 +59,6 @@ window.onload = () => {
                 ".p-threads_footer__input_container {min-height: 0px !important}",
                 "button[data-qa='close_flexpane']{visibility: hidden;}"
             ];
-            // li[data-type='french'] {
-            //     background: #3F51B5;
-            // }
             for (const threadCSSContent of threadCSSContents) {
                 void webViewDOM.insertCSS(threadCSSContent);
             }

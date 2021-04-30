@@ -1,6 +1,6 @@
 import { BrowserWindow } from "electron"
 import { app } from "electron"
-import { IndexMainProcess } from "./index_main"
+import { IndexMainProcess } from "./index-main"
 import path = require("path")
 
 const indexMainProcess = new IndexMainProcess()
@@ -11,7 +11,7 @@ void app.whenReady().then(()=>{
         autoHideMenuBar : true,
         webPreferences :{
             webviewTag : true,
-            preload : path.join( __dirname,"preload.js")
+            preload : path.join( __dirname,"index-preload.js")
         }
     })
     

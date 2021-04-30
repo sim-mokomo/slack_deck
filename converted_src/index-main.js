@@ -49,4 +49,4 @@ class AddSlackColumnResponse {
     }
 }
 exports.AddSlackColumnResponse = AddSlackColumnResponse;
-//# sourceMappingURL=index_main.js.map
+//# sourceMappingURL=index-main.js.map

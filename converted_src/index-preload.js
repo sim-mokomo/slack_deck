@@ -22,4 +22,4 @@ electron_1.contextBridge.exposeInMainWorld("api", {
         void electron_1.shell.openExternal(url);
     }
 });
-//# sourceMappingURL=preload.js.map
+//# sourceMappingURL=index-preload.js.map
