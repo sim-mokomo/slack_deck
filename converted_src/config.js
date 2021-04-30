@@ -34,6 +34,11 @@ class AppConfig {
         const index = this.workspaces.findIndex(x => x.workspace_id == workspaceId);
         this.workspaces[index].columns.push(workspaceColumnConfig);
     }
+    removeWorkSpaceColumnConfig(workspaceId, columnId) {
+        const index = this.workspaces.findIndex(x => x.workspace_id == workspaceId);
+        const columnIndex = this.workspaces[index].columns.findIndex(x => x.id == columnId);
+        this.workspaces[index].columns.splice(columnIndex, 1);
+    }
 }
 exports.AppConfig = AppConfig;
 AppConfig.fileName = "appconfig.json";
@@ -46,14 +51,15 @@ class WorkSpaceConfig {
 }
 exports.WorkSpaceConfig = WorkSpaceConfig;
 class WorkSpaceColumnConfig {
-    constructor(channelId, threadTs) {
+    constructor(id, channelId, threadTs) {
+        this.id = 0;
         this.channel_id = "";
         this.thread_ts = "";
         this.channel_id = channelId;
         this.thread_ts = threadTs;
     }
     static getEmpty() {
-        return new WorkSpaceColumnConfig("", "");
+        return new WorkSpaceColumnConfig(0, "", "");
     }
 }
 exports.WorkSpaceColumnConfig = WorkSpaceColumnConfig;

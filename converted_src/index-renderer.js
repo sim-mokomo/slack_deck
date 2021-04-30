@@ -20,6 +20,14 @@ window.onload = () => {
         webViewCloseButtonDOM.innerText = "×";
         webViewDivDOM.appendChild(webViewCloseButtonDOM);
         webViewCloseButtonDOM.addEventListener("click", () => {
+            let index = 0;
+            for (const child of webviewContainerDOM.children) {
+                if (child == webViewDivDOM) {
+                    window.api.RemoveSlackColumnRequest(index);
+                    break;
+                }
+                index++;
+            }
             webviewContainerDOM.removeChild(webViewDivDOM);
         });
         const webViewDOM = document.createElement("webview");

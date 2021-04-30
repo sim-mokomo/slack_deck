@@ -13,21 +13,28 @@ class IndexMainProcess {
                 return;
             }
             const requests = workspaceConfig.columns.map((x, index) => new AddSlackColumnResponse(slack_service_1.SlackService.getWebViewURL(workspaceConfig.workspace_id, x.channel_id, x.thread_ts), index));
-            event.sender.send('add-slack-column-reply', JSON.stringify(requests));
+            this.addSlackColumnResponse(event, requests);
         });
         electron_1.ipcMain.on('add-column-main-request', (event, arg) => {
             const url = arg;
             const [channelId, threadTs] = slack_service_1.SlackService.parseUrl(url);
-            const newColumn = new config_1.WorkSpaceColumnConfig(channelId, threadTs);
             const appConfig = config_1.AppConfig.load();
             const workSpaceConfig = appConfig.workspaces[0];
+            const newColumn = new config_1.WorkSpaceColumnConfig(workSpaceConfig.columns.length, channelId, threadTs);
             appConfig.addWorkSpaceColumnConfig(workSpaceConfig.workspace_id, newColumn);
             config_1.AppConfig.save(appConfig);
             const request = {
                 url: slack_service_1.SlackService.getWebViewURL(workSpaceConfig.workspace_id, channelId, threadTs),
                 id: workSpaceConfig.columns.length
             };
-            event.sender.send('add-slack-column-reply', JSON.stringify(request));
+            this.addSlackColumnResponse(event, [request]);
+        });
+        electron_1.ipcMain.on("remove-slack-column", (event, arg) => {
+            const id = arg;
+            const appConfig = config_1.AppConfig.load();
+            const workspaceConfig = appConfig.workspaces[0];
+            appConfig.removeWorkSpaceColumnConfig(workspaceConfig.workspace_id, id);
+            config_1.AppConfig.save(appConfig);
         });
     }
     addSlackColumnResponse(event, requests) {

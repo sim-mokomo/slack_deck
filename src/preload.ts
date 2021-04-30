@@ -17,6 +17,9 @@ contextBridge.exposeInMainWorld(
         AddSlackColumnRequest: (url : string)=>{
             ipcRenderer.send("add-column-main-request", url)
         },
+        RemoveSlackColumnRequest: (id:number)=>{
+            ipcRenderer.send("remove-slack-column", id)
+        },
         OpenBrowser : (url:string) => {
             void shell.openExternal(url)
         }

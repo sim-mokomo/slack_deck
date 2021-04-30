@@ -15,6 +15,9 @@ electron_1.contextBridge.exposeInMainWorld("api", {
     AddSlackColumnRequest: (url) => {
         electron_1.ipcRenderer.send("add-column-main-request", url);
     },
+    RemoveSlackColumnRequest: (id) => {
+        electron_1.ipcRenderer.send("remove-slack-column", id);
+    },
     OpenBrowser: (url) => {
         void electron_1.shell.openExternal(url);
     }
