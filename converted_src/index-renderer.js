@@ -32,18 +32,28 @@ window.onload = () => {
         });
         webViewDOM.style.setProperty("width", webViewWidth);
         webViewDOM.addEventListener("did-finish-load", () => {
+            const commonCSSContents = [
+                ".p-top_nav--windows:after, .p-top_nav button, .p-top_nav__help__badge--dot {visibility: hidden;}",
+                ".p-client { grid-template-rows: 0px auto min-content !important; }",
+                ".p-ia__view_header.p-ia__view-header--with-sidebar-button, .p-ia__view_header:not(.p-ia__view_header--with-history){visibility: hidden;}",
+                ".p-classic_nav__model__title__name__button {visibility: visible; overflow: visible !important;}"
+            ];
+            for (const commonCSSContent of commonCSSContents) {
+                void webViewDOM.insertCSS(commonCSSContent);
+            }
             const isThread = url.includes("thread");
-            void webViewDOM.insertCSS(".p-top_nav--windows:after, .p-top_nav button, .p-top_nav__help__badge--dot {visibility: hidden;}");
-            void webViewDOM.insertCSS(".p-client { grid-template-rows: 0px auto min-content !important; }");
-            void webViewDOM.insertCSS(".p-ia__view_header.p-ia__view-header--with-sidebar-button, .p-ia__view_header:not(.p-ia__view_header--with-history){visibility: hidden;}");
-            void webViewDOM.insertCSS(".p-classic_nav__model__title__name__button {visibility: visible; overflow: visible !important;}");
             if (!isThread) {
                 return;
             }
-            void webViewDOM.insertCSS(".p-workspace__primary_view{ visibility: hidden;} .p-workspace__sidebar{ visibility: hidden; }");
-            void webViewDOM.insertCSS(`.p-workspace-layout .p-workspace__secondary_view { width: ${webViewWidth}; }`);
-            void webViewDOM.insertCSS(".p-threads_footer__input_container {min-height: 0px !important}");
-            void webViewDOM.insertCSS(".c-icon_button--light, .c-icon_button--light.c-button-unstyled, .c-icon_button--light:link{visibility: hidden;}");
+            const threadCSSContents = [
+                ".p-workspace__primary_view{ visibility: hidden;} .p-workspace__sidebar{ visibility: hidden; }",
+                `.p-workspace-layout .p-workspace__secondary_view { width: ${webViewWidth}; }`,
+                ".p-threads_footer__input_container {min-height: 0px !important}",
+                ".c-icon_button--light, .c-icon_button--light.c-button-unstyled, .c-icon_button--light:link{visibility: hidden;}"
+            ];
+            for (const threadCSSContent of threadCSSContents) {
+                void webViewDOM.insertCSS(threadCSSContent);
+            }
         });
         webViewDivDOM.appendChild(webViewDOM);
         webviewContainerDOM.appendChild(webViewDivDOM);
