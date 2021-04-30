@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const electron_1 = require("electron");
 const electron_2 = require("electron");
 const index_main_1 = require("./index_main");
+const path = require("path");
 const indexMainProcess = new index_main_1.IndexMainProcess();
 indexMainProcess.init();
 void electron_2.app.whenReady().then(() => {
@@ -10,8 +11,7 @@ void electron_2.app.whenReady().then(() => {
         autoHideMenuBar: true,
         webPreferences: {
             webviewTag: true,
-            nodeIntegration: true,
-            contextIsolation: false
+            preload: path.join(__dirname, "preload.js")
         }
     });
     void rootWindow.loadFile("src/index.html");
