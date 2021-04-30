@@ -25,6 +25,11 @@ body {
     background-color: gray;
 }
 
+button.webview-item {
+    min-width: 100px;
+    min-height: 100px;
+}
+
 .webview-item{
     height: 100%;
     background-color: black;

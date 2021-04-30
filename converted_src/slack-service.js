@@ -16,9 +16,9 @@ class SlackService {
     static createThreadId(channelId, threadTs) {
         return `${channelId}-${threadTs}`;
     }
-    static getWebViewURL(workspaceId, channelId, threadId) {
-        return threadId.length > 0 ?
-            this.getThreadUrl(workspaceId, channelId, threadId) :
+    static getWebViewURL(workspaceId, channelId, threadTs) {
+        return threadTs.length > 0 ?
+            this.getThreadUrl(workspaceId, channelId, threadTs) :
             this.getChannelUrl(workspaceId, channelId);
     }
     static parseUrl(url) {

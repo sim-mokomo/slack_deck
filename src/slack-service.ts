@@ -17,9 +17,9 @@ export class SlackService {
         return `${channelId}-${threadTs}`
     }
 
-    static getWebViewURL(workspaceId:string , channelId: string, threadId:string) : string {
-        return threadId.length > 0 ?
-            this.getThreadUrl(workspaceId, channelId, threadId) :
+    static getWebViewURL(workspaceId:string , channelId: string, threadTs:string) : string {
+        return threadTs.length > 0 ?
+            this.getThreadUrl(workspaceId, channelId, threadTs) :
             this.getChannelUrl(workspaceId, channelId)
     }
 

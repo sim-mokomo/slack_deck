@@ -33,6 +33,12 @@ export class AppConfig {
         const index = this.workspaces.findIndex(x => x.workspace_id == workspaceId)
         this.workspaces[index].columns.push(workspaceColumnConfig)
     }
+
+    removeWorkSpaceColumnConfig(workspaceId:string, columnId:number){
+        const index = this.workspaces.findIndex(x => x.workspace_id == workspaceId)
+        const columnIndex = this.workspaces[index].columns.findIndex(x => x.id == columnId)
+        this.workspaces[index].columns.splice(columnIndex, 1)
+    }
 }
 
 export class WorkSpaceConfig{
@@ -45,15 +51,16 @@ export class WorkSpaceConfig{
 }
 
 export class WorkSpaceColumnConfig {
+    id = 0
     channel_id = ""
     thread_ts = ""
 
-    constructor(channelId: string, threadTs:string) {
+    constructor(id:number, channelId: string, threadTs:string) {
         this.channel_id = channelId
         this.thread_ts = threadTs
     }
 
     static getEmpty() : WorkSpaceColumnConfig{
-        return new WorkSpaceColumnConfig("", "")
+        return new WorkSpaceColumnConfig(0, "", "")
     }
 }
