@@ -1,4 +1,4 @@
-import {ipcRenderer, shell, contextBridge, NewWindowEvent, WebviewTag} from "electron"
+import {ipcRenderer, shell, contextBridge} from "electron"
 import {AddSlackColumnResponse} from "./index-main"
 
 contextBridge.exposeInMainWorld(

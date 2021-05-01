@@ -22,15 +22,7 @@ window.onload = () => {
 
         const webviewContainerDOM = document.getElementsByClassName("webview-container")[0]
         webViewCloseButtonDOM.addEventListener("click", ()=>{
-            let index = 0
-            for (const child of webviewContainerDOM.children) {
-                if(child == webViewDivDOM){
-                    window.api.RemoveSlackColumnRequest(index)
-                    break
-                }
-                index++
-            }
-
+            window.api.RemoveSlackColumnRequest(id)
             webviewContainerDOM.removeChild(webViewDivDOM)
         })
 

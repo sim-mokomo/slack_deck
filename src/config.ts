@@ -25,7 +25,7 @@ export class AppConfig {
         return config
     }
 
-    addWorkSpaceConfig(workspaceConfig: WorkSpaceConfig){
+    addWorkSpaceConfig(workspaceConfig: WorkSpaceConfig) : void {
         this.workspaces.push(workspaceConfig)
     }
 
@@ -34,7 +34,7 @@ export class AppConfig {
         this.workspaces[index].columns.push(workspaceColumnConfig)
     }
 
-    removeWorkSpaceColumnConfig(workspaceId:string, columnId:number){
+    removeWorkSpaceColumnConfig(workspaceId:string, columnId:number) : void{
         const index = this.workspaces.findIndex(x => x.workspace_id == workspaceId)
         const columnIndex = this.workspaces[index].columns.findIndex(x => x.id == columnId)
         this.workspaces[index].columns.splice(columnIndex, 1)

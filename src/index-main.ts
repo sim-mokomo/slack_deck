@@ -1,11 +1,11 @@
-import {ipcMain, shell} from "electron";
+import {ipcMain} from "electron";
 import {IpcMainEvent} from "electron"
 import {AppConfig, WorkSpaceColumnConfig} from "./config";
 import {SlackService} from "./slack-service";
 
 export class IndexMainProcess{
-    init() {
-        ipcMain.on("init-index", (event,...args) => {
+    init() : void{
+        ipcMain.on("init-index", (event) => {
             const appConfig = AppConfig.load()
             const workspaceConfig = appConfig.workspaces[0]
             if(workspaceConfig.workspace_id.length <= 0){
