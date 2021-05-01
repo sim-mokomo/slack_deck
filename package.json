@@ -9,7 +9,8 @@
     "make": "electron-forge make",
     "build-win": "electron-builder --win",
     "build-mac": "electron-builder --mac",
-    "lint" : "npx eslint ./src/*.ts"
+    "lint": "npx eslint ./src/*.ts",
+    "pretter" : "prettier-tslint fix ./src/**/*.ts"
   },
   "build": {
     "appId": "com.sim_mokomo.slack_deck",
