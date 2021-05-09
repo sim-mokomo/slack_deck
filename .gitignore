@@ -129,4 +129,5 @@ tmp/
 temp/
 
 # End of https://www.toptal.com/developers/gitignore/api/node
-converted_src/*.js
+
+src/*.js

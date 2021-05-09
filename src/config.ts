@@ -8,11 +8,8 @@ export class AppConfig {
 		if (!fs.existsSync(this.fileName)) {
 			return this.save(this.getEmpty())
 		}
-		const config = <AppConfig>(
-			JSON.parse(fs.readFileSync(this.fileName, "utf-8"))
-		)
 		const ret: AppConfig = new AppConfig()
-		Object.assign(ret, config)
+		Object.assign(ret, JSON.parse(fs.readFileSync(this.fileName, "utf-8")))
 		return ret
 	}
 
