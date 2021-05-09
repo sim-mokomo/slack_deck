@@ -7,7 +7,9 @@ declare global {
 export interface SandBox {
 	InitIndex: () => void
 	AddSlackColumnReply: (listener: (url: string, id: number) => void) => void
-	AddSlackColumnRequest: (url: string) => void
+	AddSlackColumnRequest: (url: string,) => void
 	RemoveSlackColumnRequest: (id: number) => void
-	OpenBrowser: (url: string) => void
+	OnFinishedSlackColumn: (url: string) => void
+	UpdateSlackColumnPositionRequest: (listener:()=>void) => void
+	UpdateSlackColumnPositionResponse: (xPosList:number[], yPosList:number[]) => void
 }

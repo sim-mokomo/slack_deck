@@ -1,11 +1,11 @@
 import { ipcRenderer, shell, contextBridge } from "electron"
-import { AddSlackColumnResponse } from "./index-main"
+import {AddSlackColumnReply} from "./add-slack-column-reply";
 
 contextBridge.exposeInMainWorld("api", {
 	InitIndex: () => ipcRenderer.send("init-index"),
 	AddSlackColumnReply: (listener: (url: string, id: number) => void) => {
 		ipcRenderer.on("add-slack-column-reply", (event, arg) => {
-			const responses: AddSlackColumnResponse[] = []
+			const responses: AddSlackColumnReply[] = []
 			Object.assign(responses, JSON.parse(arg))
 
 			for (const response of responses) {
@@ -19,7 +19,15 @@ contextBridge.exposeInMainWorld("api", {
 	RemoveSlackColumnRequest: (id: number) => {
 		ipcRenderer.send("remove-slack-column", id)
 	},
-	OpenBrowser: (url: string) => {
-		void shell.openExternal(url)
+	OnFinishedSlackColumn: (url: string) => {
+		ipcRenderer.send("on-finished-slack-column", url)
 	},
+	UpdateSlackColumnPositionRequest: (listener:()=>void) => {
+		ipcRenderer.on("update-slack-column-position-request", (event, requestJson) => {
+			listener()
+		})
+	},
+	UpdateSlackColumnPositionResponse: (xPosList:number[], yPosList:number[]) => {
+		ipcRenderer.send("update-slack-column-position-response", xPosList,yPosList)
+	}
 })
