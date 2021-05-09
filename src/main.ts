@@ -1,4 +1,4 @@
-import {BrowserWindow, BrowserView, shell} from "electron"
+import {BrowserWindow} from "electron"
 import { app } from "electron"
 import { IndexMainProcess } from "./index-main"
 import path = require("path")

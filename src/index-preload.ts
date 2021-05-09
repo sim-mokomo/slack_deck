@@ -1,4 +1,4 @@
-import { ipcRenderer, shell, contextBridge } from "electron"
+import { ipcRenderer, contextBridge } from "electron"
 import {AddSlackColumnReply} from "./add-slack-column-reply";
 
 contextBridge.exposeInMainWorld("api", {
@@ -23,7 +23,7 @@ contextBridge.exposeInMainWorld("api", {
 		ipcRenderer.send("on-finished-slack-column", url)
 	},
 	UpdateSlackColumnPositionRequest: (listener:()=>void) => {
-		ipcRenderer.on("update-slack-column-position-request", (event, requestJson) => {
+		ipcRenderer.on("update-slack-column-position-request", () => {
 			listener()
 		})
 	},

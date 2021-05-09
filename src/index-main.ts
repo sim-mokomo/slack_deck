@@ -1,4 +1,4 @@
-import {BrowserView, ipcMain, shell, Rectangle, BrowserWindow} from "electron"
+import {BrowserView, ipcMain, shell, BrowserWindow} from "electron"
 import { IpcMainEvent } from "electron"
 import { AppConfig, WorkSpaceColumnConfig } from "./config"
 import { SlackService } from "./slack-service"
@@ -15,7 +15,6 @@ export class IndexMainProcess {
 			this.updateSlackColumnPositionRequest()
 		})
 		this.rootWindow.on("maximize", () =>{
-			console.log("maxmise")
 			this.updateSlackColumnPositionRequest()
 		})
 	}
@@ -108,7 +107,7 @@ export class IndexMainProcess {
 	addSlackColumnResponse(event: IpcMainEvent, requests: AddSlackColumnReply[],): void {
 		event.sender.send("add-slack-column-reply", JSON.stringify(requests))
 	}
-	updateSlackColumnPositionRequest(){
+	updateSlackColumnPositionRequest() : void {
 		this.rootWindow.webContents.send("update-slack-column-position-request")
 	}
 }
@@ -117,7 +116,7 @@ function createSlackColumn(url:string) : BrowserView {
 	const view = new BrowserView()
 	void view.webContents.loadURL(url)
 	const width = 400
-	view.webContents.addListener("new-window", (event, url, frameName) => {
+	view.webContents.addListener("new-window", (event, url) => {
 		event.preventDefault()
 		void shell.openExternal(url)
 	})

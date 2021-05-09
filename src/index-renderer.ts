@@ -1,5 +1,3 @@
-import {ipcRenderer} from "electron";
-
 const slackColumnViewDOMs : HTMLDivElement[] = []
 
 window.onload = () => {

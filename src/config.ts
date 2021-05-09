@@ -24,10 +24,6 @@ export class AppConfig {
 		return config
 	}
 
-	addWorkSpaceConfig(workspaceConfig: WorkSpaceConfig): void {
-		this.workspaces.push(workspaceConfig)
-	}
-
 	addWorkSpaceColumnConfig(
 		workspaceId: string,
 		workspaceColumnConfig: WorkSpaceColumnConfig,
