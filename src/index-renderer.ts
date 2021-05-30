@@ -1,6 +1,10 @@
 const slackColumnViewDOMs : HTMLDivElement[] = []
 
 window.onload = () => {
+	window.addEventListener("scroll", ()=>{
+		requestSlackColumnPosUpdate()
+	})
+
 	const addColumnConfirmButtonDOM = document.getElementById(
 		"add-column-confirm-button",
 	)
@@ -41,15 +45,33 @@ window.onload = () => {
 	})
 
 	window.api.UpdateSlackColumnPositionRequest(()=>{
-		const xPosList :number[] = []
-		const yPosList :number[] = []
-		slackColumnViewDOMs.forEach(x => {
-			const rect = x.getBoundingClientRect()
-			xPosList.push(rect.x)
-			yPosList.push(rect.y)
-		})
-		window.api.UpdateSlackColumnPositionResponse(xPosList,yPosList)
+		requestSlackColumnPosUpdate()
 	})
 
 	window.api.InitIndex()
+}
+
+
+function requestSlackColumnPosUpdate() {
+	const [xPosList,yPosList,widthList,heightList] = getSlackColumnViewDomRects()
+	window.api.UpdateSlackColumnPositionResponse(
+		xPosList,
+		yPosList,
+		widthList,
+		heightList)
+}
+
+function getSlackColumnViewDomRects() : [number[], number[], number[], number[]]{
+	const xPosList :number[] = []
+	const yPosList :number[] = []
+	const widthList :number[] = []
+	const heightList :number[] = []
+	slackColumnViewModels.forEach(x => {
+		const rect = x.dom.getBoundingClientRect()
+		xPosList.push(rect.x)
+		yPosList.push(rect.y)
+		widthList.push(rect.width)
+		heightList.push(rect.height)
+	})
+	return [xPosList,yPosList,widthList,heightList]
 }

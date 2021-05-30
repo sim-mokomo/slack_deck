@@ -10,6 +10,6 @@ export interface SandBox {
 	AddSlackColumnRequest: (url: string,) => void
 	RemoveSlackColumnRequest: (id: number) => void
 	OnFinishedSlackColumn: (url: string) => void
-	UpdateSlackColumnPositionRequest: (listener:()=>void) => void
-	UpdateSlackColumnPositionResponse: (xPosList:number[], yPosList:number[]) => void
+	UpdateSlackColumnPositionRequest: (listener: () => void) => void
+	UpdateSlackColumnPositionResponse: (xPosList: number[], yPosList: number[], widthList: number[], heightList: number[]) => void
 }

@@ -91,21 +91,18 @@ export class IndexMainProcess {
 			this.updateSlackColumnPositionRequest()
 		})
 
-		ipcMain.on("update-slack-column-position-response", (event, xPosList: number[], yPosList: number[]) => {
+		ipcMain.on("update-slack-column-position-response", (event, xPosList: number[], yPosList: number[], widthList:number[], heightList:number[]) => {
 			console.log("reposition")
+			console.log(xPosList)
 			this.columnModels.forEach((model, i) => {
 				// todo: domから取得する
 				const columnHeaderHeight = 26
-				const x = xPosList[i]
-				const y = yPosList[i] + columnHeaderHeight
-				console.log(`i: ${i} x: ${x}, y:${y}`)
 				// note: setBound は 整数しか受け入れないので round している
 				model.view.setBounds({
-					x: Math.round(x),
-					y: Math.round(y),
-					width: model.view.getBounds().width,
-					// note: browser view がはみ出して表示されてしまうので
-					height: this.rootWindow.getBounds().height - 100
+					x: Math.round(xPosList[i]),
+					y: Math.round(yPosList[i] + columnHeaderHeight),
+					width: ColumnWidth,
+					height: Math.round(heightList[i]) - columnHeaderHeight
 				})
 			})
 		})
