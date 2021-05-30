@@ -5,12 +5,15 @@ import { SlackService } from "./slack-service"
 import {SlackColumnModel} from "./slack-column-model";
 import {AddSlackColumnReply} from "./add-slack-column-reply";
 
+const ColumnWidth = 400
+
 export class IndexMainProcess {
 	columnModels : SlackColumnModel[] = []
 	rootWindow : BrowserWindow
 
 	constructor(rootWindow:BrowserWindow) {
 		this.rootWindow = rootWindow
+
 		this.rootWindow.on("resized", () => {
 			this.updateSlackColumnPositionRequest()
 		})
@@ -119,12 +122,11 @@ export class IndexMainProcess {
 function createSlackColumn(url:string) : BrowserView {
 	const view = new BrowserView()
 	void view.webContents.loadURL(url)
-	const width = 400
 	view.webContents.addListener("new-window", (event, url) => {
 		event.preventDefault()
 		void shell.openExternal(url)
 	})
-	view.setBounds({x:0,y:0,width:width,height:0})
+	view.setBounds({x:0,y:0,width:ColumnWidth,height:0})
 	view.webContents.addListener("did-finish-load", () => {
 		const commonCSSContents = [
 			".p-top_nav--windows:after, .p-top_nav button, .p-top_nav__help__badge--dot {visibility: hidden;}",
@@ -142,7 +144,7 @@ function createSlackColumn(url:string) : BrowserView {
 		}
 		const threadCSSContents = [
 			".p-workspace__primary_view{ visibility: hidden;} .p-workspace__sidebar{ visibility: hidden; }",
-			`.p-workspace-layout .p-workspace__secondary_view { width: ${width}px; }`,
+			`.p-workspace-layout .p-workspace__secondary_view { width: ${ColumnWidth}px; }`,
 			".p-threads_footer__input_container {min-height: 0px !important}",
 			"button[data-qa='close_flexpane']{visibility: hidden;}",
 		]
