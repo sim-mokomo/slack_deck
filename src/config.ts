@@ -60,6 +60,7 @@ export class WorkSpaceColumnConfig {
 	thread_ts = ""
 
 	constructor(id: number, channelId: string, threadTs: string) {
+		this.id = id
 		this.channel_id = channelId
 		this.thread_ts = threadTs
 	}
