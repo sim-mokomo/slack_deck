@@ -1,4 +1,4 @@
-const slackColumnViewDOMs : HTMLDivElement[] = []
+const slackColumnViewModels : SlackColumnViewModel[] = []
 
 window.onload = () => {
 	window.addEventListener("scroll", ()=>{
@@ -35,10 +35,14 @@ window.onload = () => {
 		const webviewContainerDOM = document.getElementsByClassName("webview-container",)[0]
 		closeButtonDOM.addEventListener("click", () => {
 			window.api.RemoveSlackColumnRequest(id)
-			webviewContainerDOM.removeChild(webViewItemDiv)
+			const removeViewModelIndex = slackColumnViewModels.findIndex(x => x.id == id)
+			const slackColumnViewModel = slackColumnViewModels[removeViewModelIndex]
+			slackColumnViewModels.splice(removeViewModelIndex, 1)
+			webviewContainerDOM.removeChild(slackColumnViewModel.dom)
+			requestSlackColumnPosUpdate()
 		})
 
-		slackColumnViewDOMs.push(webViewItemDiv)
+		slackColumnViewModels.push(new SlackColumnViewModel(webViewItemDiv, id))
 		webviewContainerDOM.appendChild(webViewItemDiv)
 
 		window.api.OnFinishedSlackColumn(url)
@@ -51,6 +55,16 @@ window.onload = () => {
 	window.api.InitIndex()
 }
 
+class SlackColumnViewModel
+{
+	dom : HTMLDivElement
+	id : number
+
+	constructor(dom:HTMLDivElement, id:number) {
+		this.dom = dom
+		this.id = id
+	}
+}
 
 function requestSlackColumnPosUpdate() {
 	const [xPosList,yPosList,widthList,heightList] = getSlackColumnViewDomRects()

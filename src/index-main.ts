@@ -50,17 +50,13 @@ export class IndexMainProcess {
 
 			const appConfig = AppConfig.load()
 			const workSpaceConfig = appConfig.workspaces[0]
+			console.log(workSpaceConfig.columns)
+			console.log(`column length ${workSpaceConfig.columns.length}`)
 			const newColumn = new WorkSpaceColumnConfig(
 				workSpaceConfig.columns.length,
 				channelId,
 				threadTs,
 			)
-			appConfig.addWorkSpaceColumnConfig(
-				workSpaceConfig.workspace_id,
-				newColumn,
-			)
-			AppConfig.save(appConfig)
-
 			const request: AddSlackColumnReply = {
 				url: SlackService.getWebViewURL(
 					workSpaceConfig.workspace_id,
@@ -69,11 +65,26 @@ export class IndexMainProcess {
 				),
 				id: workSpaceConfig.columns.length,
 			}
+			appConfig.addWorkSpaceColumnConfig(
+				workSpaceConfig.workspace_id,
+				newColumn,
+			)
+			AppConfig.save(appConfig)
 			this.addSlackColumnResponse(event, [request])
 		})
 
 		ipcMain.on("remove-slack-column", (event, arg) => {
 			const id = <number>arg
+			const removeIndex = this.columnModels.findIndex(x => x.id == id)
+			const columnModel: SlackColumnModel = this.columnModels[removeIndex]
+			console.log(id)
+			console.log(`delete before ${this.columnModels.length}`)
+			this.columnModels.splice(removeIndex, 1)
+			console.log(`delete after ${this.columnModels.length}`)
+			const view = columnModel.view
+			this.rootWindow.removeBrowserView(view)
+			view.webContents.delete()
+
 			const appConfig = AppConfig.load()
 			const workspaceConfig = appConfig.workspaces[0]
 			appConfig.removeWorkSpaceColumnConfig(
@@ -84,10 +95,9 @@ export class IndexMainProcess {
 		})
 
 		ipcMain.on("on-finished-slack-column", (ipcMainEvent, url) => {
-			console.log("construct slack")
 			const view = createSlackColumn(url)
 			this.rootWindow.addBrowserView(view)
-			this.columnModels.push(new SlackColumnModel(view))
+			this.columnModels.push(new SlackColumnModel(this.columnModels.length, view))
 			this.updateSlackColumnPositionRequest()
 		})
 
