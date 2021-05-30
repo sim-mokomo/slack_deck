@@ -14,7 +14,7 @@ export class AppConfig {
 	}
 
 	static save(config: AppConfig): AppConfig {
-		fs.writeFileSync(this.fileName, JSON.stringify(config))
+		fs.writeFileSync(this.fileName, JSON.stringify(config,null , "\t"))
 		return config
 	}
 
