@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Slack Deck</title>
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.3/css/all.css" integrity="sha384-SZXxX4whJ79/gErwcOYf+zWLeJdY/qpuqC4cAa9rOGUstPomtqpuNWT9wdPEn2fk" crossorigin="anonymous">
+</head>
+<body>
+    <div class="main">
+        <div id="menu">
+            <input type="text", id="add-column-input" name="add-url" required minlength="1" size="60" placeholder="url を入力">
+            <button type="button" id="add-column-confirm-button">
+                <i class="fas fa-plus"></i>
+            </button>
+        </div>
+        <div class="webview-container">
+        </div>
+
+<!--     NOTE: https://usefuledge.com/electron_typescript_export_is_not_defined.html-->
+        <script> var exports = {}; </script>
+        <script type="text/javascript" src="../src/index-renderer.js"></script>
+    </div>
+</body>
+</html>
