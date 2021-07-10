@@ -45,7 +45,7 @@ window.onload = () => {
 		slackColumnViewModels.push(new SlackColumnViewModel(webViewItemDiv, id))
 		webviewContainerDOM.appendChild(webViewItemDiv)
 
-		window.api.OnFinishedSlackColumn(url)
+		window.api.OnAddedSlackColumn(url)
 	})
 
 	window.api.UpdateSlackColumnPositionRequest(()=>{
