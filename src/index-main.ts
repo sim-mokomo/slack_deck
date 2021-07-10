@@ -31,15 +31,11 @@ export class IndexMainProcess {
 				return
 			}
 
-			const requests: AddSlackColumnReply[] = workspaceConfig.getColumns().map(
-				(x : WorkspaceColumnConfig, index) =>
+			const requests = workspaceConfig.getColumns().map(
+				(x, index) =>
 					new AddSlackColumnReply(
-						SlackService.getWebViewURL(
-							workspaceConfig.workspace_id,
-							x.channel_id,
-							x.thread_ts,
-						),
-						index,
+						SlackService.getWebViewURL(workspaceConfig.workspace_id, x.channel_id, x.thread_ts),
+						index
 					),
 			)
 			this.addSlackColumnResponse(event, requests)
@@ -74,26 +70,19 @@ export class IndexMainProcess {
 
 		ipcMain.on("remove-slack-column", (event, arg) => {
 			const id = <number>arg
-			const removeIndex = this.columnModels.findIndex(x => x.id == id)
-			const columnModel: SlackColumnModel = this.columnModels[removeIndex]
-			console.log(id)
-			console.log(`delete before ${this.columnModels.length}`)
-			this.columnModels.splice(removeIndex, 1)
-			console.log(`delete after ${this.columnModels.length}`)
-			const view = columnModel.view
-			this.rootWindow.removeBrowserView(view)
-			view.webContents.delete()
+			this.removeSlackColumn(id)
 
 			const appConfig = AppConfig.load()
-			const workspaceConfig = appConfig.workspaces[0]
-			appConfig.removeWorkspaceColumnConfig(
-				workspaceConfig.workspace_id,
-				id,
-			)
+			const workspaceConfig = appConfig.getWorkspaceConfigHead()
+			if(workspaceConfig == null){
+				return
+			}
+
+			appConfig.removeWorkspaceColumnConfig(workspaceConfig.workspace_id, id)
 			AppConfig.save(appConfig)
 		})
 
-		ipcMain.on("on-finished-slack-column", (ipcMainEvent, url) => {
+		ipcMain.on("on-added-slack-column", (ipcMainEvent, url) => {
 			const view = createSlackColumn(url)
 			this.rootWindow.addBrowserView(view)
 			this.columnModels.push(new SlackColumnModel(this.columnModels.length, view))
@@ -122,6 +111,18 @@ export class IndexMainProcess {
 	}
 	updateSlackColumnPositionRequest() : void {
 		this.rootWindow.webContents.send("update-slack-column-position-request")
+	}
+
+	removeSlackColumn(slackColumnId:number) {
+		const columnModel = this.columnModels.find(x => x.id == slackColumnId)
+		if(columnModel == null){
+			return
+		}
+
+		this.columnModels = this.columnModels.filter(x => x.id == slackColumnId)
+		const view = columnModel.view
+		this.rootWindow.removeBrowserView(view)
+		view.webContents.delete()
 	}
 }
 
