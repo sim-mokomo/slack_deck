@@ -1,9 +1,10 @@
-import {BrowserView, ipcMain, shell, BrowserWindow} from "electron"
+import {BrowserView, ipcMain, shell, BrowserWindow, app} from "electron"
 import { IpcMainEvent } from "electron"
-import { AppConfig, WorkSpaceColumnConfig } from "./config"
+import { AppConfig } from "./app-config"
 import { SlackService } from "./slack-service"
 import {SlackColumnModel} from "./slack-column-model";
 import {AddSlackColumnReply} from "./add-slack-column-reply";
+import {WorkspaceColumnConfig} from "./workspace-column-config";
 
 const ColumnWidth = 400
 
@@ -25,13 +26,13 @@ export class IndexMainProcess {
 	init(): void {
 		ipcMain.on("init-index", (event) => {
 			const appConfig = AppConfig.load()
-			const workspaceConfig = appConfig.workspaces[0]
-			if (workspaceConfig.workspace_id.length <= 0) {
+			const workspaceConfig = appConfig.getWorkspaceConfigHead()
+			if(workspaceConfig == null){
 				return
 			}
 
-			const requests: AddSlackColumnReply[] = workspaceConfig.columns.map(
-				(x, index) =>
+			const requests: AddSlackColumnReply[] = workspaceConfig.getColumns().map(
+				(x : WorkspaceColumnConfig, index) =>
 					new AddSlackColumnReply(
 						SlackService.getWebViewURL(
 							workspaceConfig.workspace_id,
@@ -50,10 +51,8 @@ export class IndexMainProcess {
 
 			const appConfig = AppConfig.load()
 			const workSpaceConfig = appConfig.workspaces[0]
-			console.log(workSpaceConfig.columns)
-			console.log(`column length ${workSpaceConfig.columns.length}`)
-			const newColumn = new WorkSpaceColumnConfig(
-				workSpaceConfig.columns.length,
+			const newColumn = new WorkspaceColumnConfig(
+				workSpaceConfig.getColumnNum(),
 				channelId,
 				threadTs,
 			)
@@ -63,9 +62,9 @@ export class IndexMainProcess {
 					channelId,
 					threadTs,
 				),
-				id: workSpaceConfig.columns.length,
+				id: workSpaceConfig.getColumnNum(),
 			}
-			appConfig.addWorkSpaceColumnConfig(
+			appConfig.addWorkspaceColumnConfig(
 				workSpaceConfig.workspace_id,
 				newColumn,
 			)
@@ -87,7 +86,7 @@ export class IndexMainProcess {
 
 			const appConfig = AppConfig.load()
 			const workspaceConfig = appConfig.workspaces[0]
-			appConfig.removeWorkSpaceColumnConfig(
+			appConfig.removeWorkspaceColumnConfig(
 				workspaceConfig.workspace_id,
 				id,
 			)
