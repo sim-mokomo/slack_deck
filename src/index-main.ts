@@ -68,7 +68,7 @@ export class IndexMainProcess {
 			this.addSlackColumnResponse(event, [request])
 		})
 
-		ipcMain.on("remove-slack-column", (event, arg) => {
+		ipcMain.on("remove-slack-column-request", (event, arg) => {
 			const id = <number>arg
 			this.removeSlackColumn(id)
 
