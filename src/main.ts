@@ -3,7 +3,6 @@ import { app } from "electron"
 import { IndexMainProcess } from "./index-main"
 import path = require("path")
 
-
 void app.whenReady().then(() => {
 	const rootWindow = new BrowserWindow({
 		autoHideMenuBar: true,

@@ -14,7 +14,7 @@ contextBridge.exposeInMainWorld("api", {
 		})
 	},
 	AddSlackColumnRequest: (url: string) => {
-		ipcRenderer.send("add-column-main-request", url)
+		ipcRenderer.send("add-slack-column-request", url)
 	},
 	RemoveSlackColumnRequest: (id: number) => {
 		ipcRenderer.send("remove-slack-column-request", id)

@@ -4,7 +4,7 @@
   "description": "slack wrapper application like twitter deck",
   "main": "src/main.js",
   "scripts": {
-    "test" : "tsc && jest",
+    "test": "tsc && jest",
     "start": "tsc && electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",

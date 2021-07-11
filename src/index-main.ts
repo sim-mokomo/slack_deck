@@ -1,10 +1,8 @@
-import {BrowserView, ipcMain, shell, BrowserWindow, app} from "electron"
-import { IpcMainEvent } from "electron"
-import { AppConfig } from "./app-config"
+import {BrowserView, ipcMain, shell, BrowserWindow, IpcMainEvent} from "electron"
+import {AppConfig, WorkspaceColumnConfig} from "./app-config"
 import { SlackService } from "./slack-service"
 import {SlackColumnModel} from "./slack-column-model";
 import {AddSlackColumnReply} from "./add-slack-column-reply";
-import {WorkspaceColumnConfig} from "./workspace-column-config";
 
 const ColumnWidth = 400
 
@@ -31,7 +29,7 @@ export class IndexMainProcess {
 				return
 			}
 
-			const requests = workspaceConfig.getColumns().map(
+			const requests = workspaceConfig.columns.map(
 				(x, index) =>
 					new AddSlackColumnReply(
 						SlackService.getWebViewURL(workspaceConfig.workspace_id, x.channel_id, x.thread_ts),
@@ -41,14 +39,18 @@ export class IndexMainProcess {
 			this.addSlackColumnResponse(event, requests)
 		})
 
-		ipcMain.on("add-column-main-request", (event, arg) => {
+		ipcMain.on("add-slack-column-request", (event, arg) => {
 			const url: string = <string>arg
 			const [channelId, threadTs] = SlackService.parseUrl(url)
 
 			const appConfig = AppConfig.load()
-			const workSpaceConfig = appConfig.workspaces[0]
+			const workSpaceConfig = appConfig.getWorkspaceConfigHead()
+			if(workSpaceConfig == null){
+				return
+			}
+
 			const newColumn = new WorkspaceColumnConfig(
-				workSpaceConfig.getColumnNum(),
+				workSpaceConfig.columns.length,
 				channelId,
 				threadTs,
 			)
@@ -58,7 +60,7 @@ export class IndexMainProcess {
 					channelId,
 					threadTs,
 				),
-				id: workSpaceConfig.getColumnNum(),
+				id: workSpaceConfig.columns.length,
 			}
 			appConfig.addWorkspaceColumnConfig(
 				workSpaceConfig.workspace_id,
@@ -83,9 +85,9 @@ export class IndexMainProcess {
 		})
 
 		ipcMain.on("on-added-slack-column", (ipcMainEvent, url) => {
-			const view = createSlackColumn(url)
-			this.rootWindow.addBrowserView(view)
-			this.columnModels.push(new SlackColumnModel(this.columnModels.length, view))
+			const slackColumnModel = this.createSlackColumn(this.columnModels.length,  url)
+			this.rootWindow.addBrowserView(slackColumnModel.view)
+			this.columnModels.push(slackColumnModel)
 			this.updateSlackColumnPositionRequest()
 		})
 
@@ -124,17 +126,23 @@ export class IndexMainProcess {
 		this.rootWindow.removeBrowserView(view)
 		view.webContents.delete()
 	}
-}
 
-function createSlackColumn(url:string) : BrowserView {
-	const view = new BrowserView()
-	void view.webContents.loadURL(url)
-	view.webContents.addListener("new-window", (event, url) => {
-		event.preventDefault()
-		void shell.openExternal(url)
-	})
-	view.setBounds({x:0,y:0,width:ColumnWidth,height:0})
-	view.webContents.addListener("did-finish-load", () => {
+	createSlackColumn(slackColumnId: number,url:string) : SlackColumnModel {
+		const view = new BrowserView()
+		void view.webContents.loadURL(url)
+		view.webContents.addListener("new-window", (event, url) => {
+			event.preventDefault()
+			void shell.openExternal(url)
+		})
+		view.setBounds({x:0,y:0,width:ColumnWidth,height:0})
+		view.webContents.addListener("did-finish-load", () => {
+			const isThread = url.includes("thread")
+			this.applyCSSForSlackColumn(view, isThread)
+		})
+		return new SlackColumnModel(slackColumnId, view)
+	}
+
+	applyCSSForSlackColumn(browserView : BrowserView, isThread: boolean) : void {
 		const commonCSSContents = [
 			".p-top_nav--windows:after, .p-top_nav button, .p-top_nav__help__badge--dot {visibility: hidden;}",
 			".p-client { grid-template-rows: 0px auto min-content !important; }",
@@ -142,10 +150,9 @@ function createSlackColumn(url:string) : BrowserView {
 			".p-classic_nav__model__title__name__button {visibility: visible; overflow: visible !important;}",
 		]
 		for (const commonCSSContent of commonCSSContents) {
-			void view.webContents.insertCSS(commonCSSContent)
+			void browserView.webContents.insertCSS(commonCSSContent)
 		}
 
-		const isThread = url.includes("thread")
 		if (!isThread) {
 			return
 		}
@@ -157,8 +164,7 @@ function createSlackColumn(url:string) : BrowserView {
 		]
 
 		for (const threadCSSContent of threadCSSContents) {
-			void view.webContents.insertCSS(threadCSSContent)
+			void browserView.webContents.insertCSS(threadCSSContent)
 		}
-	})
-	return view
+	}
 }

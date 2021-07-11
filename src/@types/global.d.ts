@@ -9,7 +9,7 @@ export interface SandBox {
 	AddSlackColumnReply: (listener: (url: string, id: number) => void) => void
 	AddSlackColumnRequest: (url: string,) => void
 	RemoveSlackColumnRequest: (id: number) => void
-	OnFinishedSlackColumn: (url: string) => void
+	OnAddedSlackColumn: (url: string) => void
 	UpdateSlackColumnPositionRequest: (listener: () => void) => void
 	UpdateSlackColumnPositionResponse: (xPosList: number[], yPosList: number[], widthList: number[], heightList: number[]) => void
 }
