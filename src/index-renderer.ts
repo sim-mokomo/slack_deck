@@ -1,4 +1,34 @@
-const slackColumnViewModels : SlackColumnViewModel[] = []
+class SlackWorkspaceViewModel
+{
+	private columnViewModels : SlackColumnViewModel[] = []
+
+	getColumns() { return this.columnViewModels }
+
+	addColumn(columnModel: SlackColumnViewModel){
+		this.columnViewModels.push(columnModel)
+	}
+
+	getColumn(id:number){
+		return this.columnViewModels.find(x => x.id == id)
+	}
+
+	removeColumn(id:number){
+		this.columnViewModels = this.columnViewModels.filter(x => x.id != id)
+	}
+}
+
+class SlackColumnViewModel
+{
+	dom : HTMLDivElement
+	id : number
+
+	constructor(dom:HTMLDivElement, id:number) {
+		this.dom = dom
+		this.id = id
+	}
+}
+
+const slackWorkspaceViewModel = new SlackWorkspaceViewModel()
 
 window.onload = () => {
 	window.addEventListener("scroll", ()=>{
@@ -34,15 +64,16 @@ window.onload = () => {
 
 		const webviewContainerDOM = document.getElementsByClassName("webview-container",)[0]
 		closeButtonDOM.addEventListener("click", () => {
-			window.api.RemoveSlackColumnRequest(id)
-			const removeViewModelIndex = slackColumnViewModels.findIndex(x => x.id == id)
-			const slackColumnViewModel = slackColumnViewModels[removeViewModelIndex]
-			slackColumnViewModels.splice(removeViewModelIndex, 1)
-			webviewContainerDOM.removeChild(slackColumnViewModel.dom)
-			updateSlackColumnPositionReply()
+			const column = slackWorkspaceViewModel.getColumn(id)
+			if(column != null){
+				window.api.RemoveSlackColumnRequest(id)
+				slackWorkspaceViewModel.removeColumn(id)
+				webviewContainerDOM.removeChild(column.dom)
+				updateSlackColumnPositionReply()
+			}
 		})
 
-		slackColumnViewModels.push(new SlackColumnViewModel(webViewItemDiv, id))
+		slackWorkspaceViewModel.addColumn(new SlackColumnViewModel(webViewItemDiv, id))
 		webviewContainerDOM.appendChild(webViewItemDiv)
 
 		window.api.OnAddedSlackColumn(url)
@@ -53,17 +84,6 @@ window.onload = () => {
 	})
 
 	window.api.InitIndex()
-}
-
-class SlackColumnViewModel
-{
-	dom : HTMLDivElement
-	id : number
-
-	constructor(dom:HTMLDivElement, id:number) {
-		this.dom = dom
-		this.id = id
-	}
 }
 
 function updateSlackColumnPositionReply() {
@@ -80,7 +100,7 @@ function getSlackColumnViewDomRects() : [number[], number[], number[], number[]]
 	const yPosList :number[] = []
 	const widthList :number[] = []
 	const heightList :number[] = []
-	slackColumnViewModels.forEach(x => {
+	slackWorkspaceViewModel.getColumns().forEach(x => {
 		const rect = x.dom.getBoundingClientRect()
 		xPosList.push(rect.x)
 		yPosList.push(rect.y)

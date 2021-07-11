@@ -1,11 +1,11 @@
 import { ipcRenderer, contextBridge } from "electron"
-import {AddSlackColumnReply} from "./add-slack-column-reply";
+import {AddSlackColumnRequest} from "./add-slack-column-request";
 
 contextBridge.exposeInMainWorld("api", {
 	InitIndex: () => ipcRenderer.send("init-index"),
 	AddSlackColumnReply: (listener: (url: string, id: number) => void) => {
 		ipcRenderer.on("add-slack-column-reply", (event, arg) => {
-			const responses: AddSlackColumnReply[] = []
+			const responses: AddSlackColumnRequest[] = []
 			Object.assign(responses, JSON.parse(arg))
 
 			for (const response of responses) {

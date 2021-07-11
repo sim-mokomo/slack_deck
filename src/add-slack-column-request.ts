@@ -1,4 +1,4 @@
-export class AddSlackColumnReply{
+export class AddSlackColumnRequest {
     url: string
     id: number
 
