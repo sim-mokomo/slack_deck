@@ -3,8 +3,10 @@ import {AppConfig, WorkspaceColumnConfig} from "./app-config"
 import { SlackService } from "./slack-service"
 import {SlackColumnModel} from "./slack-column-model";
 import {AddSlackColumnReply} from "./add-slack-column-reply";
+import {AppConfigRepository} from "./app-config-repository";
 
 const ColumnWidth = 400
+const AppConfigFileName = "appconfig.json"
 
 export class IndexMainProcess {
 	columnModels : SlackColumnModel[] = []
@@ -23,7 +25,8 @@ export class IndexMainProcess {
 
 	init(): void {
 		ipcMain.on("init-index", (event) => {
-			const appConfig = AppConfig.load()
+			const appConfigRepository = new AppConfigRepository()
+			const appConfig = appConfigRepository.load(AppConfigFileName)
 			const workspaceConfig = appConfig.getWorkspaceConfigHead()
 			if(workspaceConfig == null){
 				return
@@ -43,7 +46,8 @@ export class IndexMainProcess {
 			const url: string = <string>arg
 			const [channelId, threadTs] = SlackService.parseUrl(url)
 
-			const appConfig = AppConfig.load()
+			const appConfigRepository = new AppConfigRepository()
+			const appConfig = appConfigRepository.load(AppConfigFileName)
 			const workSpaceConfig = appConfig.getWorkspaceConfigHead()
 			if(workSpaceConfig == null){
 				return
@@ -66,7 +70,7 @@ export class IndexMainProcess {
 				workSpaceConfig.workspace_id,
 				newColumn,
 			)
-			AppConfig.save(appConfig)
+			appConfigRepository.save(AppConfigFileName,appConfig)
 			this.addSlackColumnResponse(event, [request])
 		})
 
@@ -74,14 +78,15 @@ export class IndexMainProcess {
 			const id = <number>arg
 			this.removeSlackColumn(id)
 
-			const appConfig = AppConfig.load()
+			const appConfigRepository = new AppConfigRepository()
+			const appConfig = appConfigRepository.load(AppConfigFileName)
 			const workspaceConfig = appConfig.getWorkspaceConfigHead()
 			if(workspaceConfig == null){
 				return
 			}
 
 			appConfig.removeWorkspaceColumnConfig(workspaceConfig.workspace_id, id)
-			AppConfig.save(appConfig)
+			appConfigRepository.save(AppConfigFileName, appConfig)
 		})
 
 		ipcMain.on("on-added-slack-column", (ipcMainEvent, url) => {
