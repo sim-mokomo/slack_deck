@@ -1,5 +1,5 @@
 import {ipcMain, shell, BrowserWindow, IpcMainEvent} from "electron"
-import {WorkspaceColumnConfig} from "./app-config"
+import {AppConfig, WorkspaceColumnConfig} from "./app-config"
 import { SlackService } from "./slack-service"
 import {AddSlackColumnRequest} from "./add-slack-column-request";
 import {AppConfigRepository} from "./app-config-repository";
@@ -10,25 +10,23 @@ const AppConfigFileName = "appconfig.json"
 export class IndexMainProcess {
 	workspaceModel = new SlackWorkspaceModel()
 	rootWindow : BrowserWindow
+	appConfig : AppConfig = new AppConfig()
 
 	constructor(rootWindow:BrowserWindow) {
 		this.rootWindow = rootWindow
 
 		this.rootWindow.on("resized", () => {
-			this.updateSlackColumnPositionRequest()
+			this.onChangedWindow()
 		})
 		this.rootWindow.on("maximize", () =>{
-			this.updateSlackColumnPositionRequest()
+			this.onChangedWindow()
 		})
 	}
 
 	init(): void {
 		ipcMain.on("init-index", (event) => {
-			const appConfigRepository = new AppConfigRepository()
-			const workspaceConfig =
-				appConfigRepository
-					.load(AppConfigFileName)
-					.getWorkspaceConfigHead()
+			this.appConfig = new AppConfigRepository().load(AppConfigFileName)
+			const workspaceConfig = this.appConfig.getWorkspaceConfigHead()
 			if(workspaceConfig == null){
 				return
 			}
@@ -40,25 +38,17 @@ export class IndexMainProcess {
 						index
 					),
 			)
-			this.addSlackColumnResponse(event, requests)
+			this.addSlackColumnReply(event, requests)
 		})
 
 		ipcMain.on("add-slack-column-request", (event, arg) => {
-			const url: string = <string>arg
-			const [channelId, threadTs] = SlackService.parseUrl(url)
-
-			const appConfigRepository = new AppConfigRepository()
-			const appConfig = appConfigRepository.load(AppConfigFileName)
-			const workSpaceConfig = appConfig.getWorkspaceConfigHead()
+			const workSpaceConfig = this.appConfig.getWorkspaceConfigHead()
 			if(workSpaceConfig == null){
 				return
 			}
 
-			const newColumn = new WorkspaceColumnConfig(
-				workSpaceConfig.columns.length,
-				channelId,
-				threadTs,
-			)
+			const url: string = <string>arg
+			const [channelId, threadTs] = SlackService.parseUrl(url)
 			const request: AddSlackColumnRequest = {
 				url: SlackService.getWebViewURL(
 					workSpaceConfig.workspace_id,
@@ -67,12 +57,18 @@ export class IndexMainProcess {
 				),
 				id: workSpaceConfig.columns.length,
 			}
-			appConfig.addWorkspaceColumnConfig(
+
+			this.appConfig.addWorkspaceColumnConfig(
 				workSpaceConfig.workspace_id,
-				newColumn,
+				new WorkspaceColumnConfig(
+					workSpaceConfig.columns.length,
+					channelId,
+					threadTs,
+				),
 			)
-			appConfigRepository.save(AppConfigFileName,appConfig)
-			this.addSlackColumnResponse(event, [request])
+
+			new AppConfigRepository().save(AppConfigFileName,this.appConfig)
+			this.addSlackColumnReply(event, [request])
 		})
 
 		ipcMain.on("remove-slack-column-request", (event, arg) => {
@@ -92,28 +88,33 @@ export class IndexMainProcess {
 
 		ipcMain.on("on-added-slack-column", (ipcMainEvent, url) => {
 			this.workspaceModel.addColumn(this.workspaceModel.createSlackColumn(this.rootWindow,url))
-			this.updateSlackColumnPositionRequest()
+			this.onChangedSlackColumn()
 		})
 
 		ipcMain.on("update-slack-column-position-reply", (event, xPosList: number[], yPosList: number[], widthList:number[], heightList:number[]) => {
-			this.updateSlackColumnPositionReply(xPosList,yPosList,widthList,heightList)
+			this.workspaceModel.getColumns().forEach((column, i) => {
+				// todo: domから取得する
+				const columnHeaderHeight = 26
+				column.setSize(
+					xPosList[i],
+					yPosList[i] + columnHeaderHeight,
+					heightList[i] - columnHeaderHeight)
+			})
 		})
 	}
 
-	addSlackColumnResponse(event: IpcMainEvent, requests: AddSlackColumnRequest[],): void {
+	onChangedWindow():void{
+		this.updateSlackColumnPositionRequest()
+	}
+
+	onChangedSlackColumn():void{
+		this.updateSlackColumnPositionRequest()
+	}
+
+	addSlackColumnReply(event: IpcMainEvent, requests: AddSlackColumnRequest[],): void {
 		event.sender.send("add-slack-column-reply", JSON.stringify(requests))
 	}
 	updateSlackColumnPositionRequest() : void {
 		this.rootWindow.webContents.send("update-slack-column-position-request")
-	}
-	updateSlackColumnPositionReply(xPosList: number[], yPosList: number[], widthList:number[], heightList:number[]) : void {
-		this.workspaceModel.getColumns().forEach((column, i) => {
-			// todo: domから取得する
-			const columnHeaderHeight = 26
-			column.setSize(
-				xPosList[i],
-				yPosList[i] + columnHeaderHeight,
-				heightList[i] - columnHeaderHeight)
-		})
 	}
 }
