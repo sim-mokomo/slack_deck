@@ -11,7 +11,7 @@ export class AppConfig {
 	removeWorkspaceColumnConfig(workspaceId: string, columnId: number): void {
 		const workspaceConfig = this.getWorkspaceConfig(workspaceId)
 		if(workspaceConfig != null) {
-			workspaceConfig.columns = workspaceConfig.columns.filter(x => x.id == columnId)
+			workspaceConfig.columns = workspaceConfig.columns.filter(x => x.id != columnId)
 		}
 	}
 
