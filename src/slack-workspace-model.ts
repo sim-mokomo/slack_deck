@@ -1,5 +1,4 @@
 import {SlackColumnModel} from "./slack-column-model";
-import {BrowserView, BrowserWindow, shell} from "electron";
 
 export class SlackWorkspaceModel {
     columnModels : SlackColumnModel[] = []
@@ -22,9 +21,4 @@ export class SlackWorkspaceModel {
             deleteColumn.delete()
         }
     }
-
-    createSlackColumn(parentWindow:BrowserWindow,url:string) : SlackColumnModel {
-        return new SlackColumnModel(parentWindow,this.columnModels.length, url)
-    }
-
 }

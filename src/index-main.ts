@@ -4,6 +4,10 @@ import { SlackService } from "./slack-service"
 import {AddSlackColumnRequest} from "./add-slack-column-request";
 import {AppConfigRepository} from "./app-config-repository";
 import {SlackWorkspaceModel} from "./slack-workspace-model";
+import {SlackColumnModel} from "./slack-column-model";
+import {SlackColumnBasicUi} from "./slack-column-basic-ui";
+import {SlackColumnHomeUi} from "./slack-column-home-ui";
+import {SlackColumnBaseUi} from "./slack-column-base-ui";
 
 const AppConfigFileName = "appconfig.json"
 
@@ -87,7 +91,12 @@ export class IndexMainProcess {
 		})
 
 		ipcMain.on("on-added-slack-column", (ipcMainEvent, url) => {
-			this.workspaceModel.addColumn(this.workspaceModel.createSlackColumn(this.rootWindow,url))
+			let columnUi = new SlackColumnBasicUi(this.rootWindow, url)
+			if(this.workspaceModel.getColumnNum() == 0){
+				columnUi = new SlackColumnHomeUi(this.rootWindow, url)
+			}
+			const column = new SlackColumnModel(columnUi, this.workspaceModel.getColumnNum())
+			this.workspaceModel.addColumn(column)
 			this.onChangedSlackColumn()
 		})
 

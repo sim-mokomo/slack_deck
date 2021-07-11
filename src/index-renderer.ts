@@ -1,34 +1,52 @@
 class SlackWorkspaceViewModel
 {
-	private columnViewModels : SlackColumnViewModel[] = []
+	private columnViews : SlackColumnView[] = []
 
-	getColumns() { return this.columnViewModels }
+	getColumns() { return this.columnViews }
 
-	addColumn(columnModel: SlackColumnViewModel){
-		this.columnViewModels.push(columnModel)
+	addColumn(columnModel: SlackColumnView){
+		this.columnViews.push(columnModel)
 	}
 
 	getColumn(id:number){
-		return this.columnViewModels.find(x => x.id == id)
+		return this.columnViews.find(x => x.id == id)
 	}
 
 	removeColumn(id:number){
-		this.columnViewModels = this.columnViewModels.filter(x => x.id != id)
+		this.columnViews = this.columnViews.filter(x => x.id != id)
 	}
 }
 
-class SlackColumnViewModel
+class SlackColumnView
 {
-	dom : HTMLDivElement
+	webviewItemDOM : HTMLDivElement
 	id : number
 
-	constructor(dom:HTMLDivElement, id:number) {
-		this.dom = dom
+	constructor(id:number, closeAction: () => void) {
+		this.webviewItemDOM = document.createElement("div")
+		this.webviewItemDOM.setAttribute("class", "webview-item")
+
 		this.id = id
+
+		if(id == 0){
+			this.webviewItemDOM.setAttribute("style", "min-width:800px;")
+		}else{
+			this.webviewItemDOM.setAttribute("style", "min-width:400px;")
+
+			const closeButtonDOM = document.createElement("button")
+			closeButtonDOM.setAttribute("type", "button")
+			const closeButtonIconDivDOM = document.createElement("div")
+			closeButtonIconDivDOM.setAttribute("class", "fas fa-times")
+			closeButtonDOM.appendChild(closeButtonIconDivDOM)
+			closeButtonDOM.addEventListener("click", closeAction)
+			this.webviewItemDOM.appendChild(closeButtonDOM)
+		}
 	}
+
+	getDOM(){return this.webviewItemDOM}
 }
 
-const slackWorkspaceViewModel = new SlackWorkspaceViewModel()
+const slackWorkspaceView = new SlackWorkspaceViewModel()
 
 window.onload = () => {
 	window.addEventListener("scroll", ()=>{
@@ -52,29 +70,19 @@ window.onload = () => {
 	}
 
 	window.api.AddSlackColumnReply((url: string, id: number) => {
-		const webViewItemDiv = document.createElement("div")
-		webViewItemDiv.setAttribute("class", "webview-item")
-
-		const closeButtonDOM = document.createElement("button")
-		closeButtonDOM.setAttribute("type", "button")
-		const closeButtonIconDivDOM = document.createElement("div")
-		closeButtonIconDivDOM.setAttribute("class", "fas fa-times")
-		closeButtonDOM.appendChild(closeButtonIconDivDOM)
-		webViewItemDiv.appendChild(closeButtonDOM)
-
 		const webviewContainerDOM = document.getElementsByClassName("webview-container",)[0]
-		closeButtonDOM.addEventListener("click", () => {
-			const column = slackWorkspaceViewModel.getColumn(id)
+		const column = new SlackColumnView(id, () => {
+			const column = slackWorkspaceView.getColumn(id)
 			if(column != null){
 				window.api.RemoveSlackColumnRequest(id)
-				slackWorkspaceViewModel.removeColumn(id)
-				webviewContainerDOM.removeChild(column.dom)
+				slackWorkspaceView.removeColumn(id)
+				webviewContainerDOM.removeChild(column.getDOM())
 				updateSlackColumnPositionReply()
 			}
 		})
 
-		slackWorkspaceViewModel.addColumn(new SlackColumnViewModel(webViewItemDiv, id))
-		webviewContainerDOM.appendChild(webViewItemDiv)
+		slackWorkspaceView.addColumn(column)
+		webviewContainerDOM.appendChild(column.getDOM())
 
 		window.api.OnAddedSlackColumn(url)
 	})
@@ -100,8 +108,8 @@ function getSlackColumnViewDomRects() : [number[], number[], number[], number[]]
 	const yPosList :number[] = []
 	const widthList :number[] = []
 	const heightList :number[] = []
-	slackWorkspaceViewModel.getColumns().forEach(x => {
-		const rect = x.dom.getBoundingClientRect()
+	slackWorkspaceView.getColumns().forEach(x => {
+		const rect = x.webviewItemDOM.getBoundingClientRect()
 		xPosList.push(rect.x)
 		yPosList.push(rect.y)
 		widthList.push(rect.width)

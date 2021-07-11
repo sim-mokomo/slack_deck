@@ -5,7 +5,7 @@ import path = require("path")
 
 void app.whenReady().then(() => {
 	const rootWindow = new BrowserWindow({
-		autoHideMenuBar: true,
+		// autoHideMenuBar: true,
 		webPreferences: {
 			preload: path.join(__dirname, "index-preload.js"),
 		},
