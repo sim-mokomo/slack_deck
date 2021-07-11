@@ -96,9 +96,7 @@ export class IndexMainProcess {
 			this.updateSlackColumnPositionRequest()
 		})
 
-		ipcMain.on("update-slack-column-position-response", (event, xPosList: number[], yPosList: number[], widthList:number[], heightList:number[]) => {
-			console.log("reposition")
-			console.log(xPosList)
+		ipcMain.on("update-slack-column-position-reply", (event, xPosList: number[], yPosList: number[], widthList:number[], heightList:number[]) => {
 			this.columnModels.forEach((model, i) => {
 				// todo: domから取得する
 				const columnHeaderHeight = 26
