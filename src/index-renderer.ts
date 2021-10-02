@@ -20,14 +20,17 @@ class SlackWorkspaceViewModel
 class SlackColumnView
 {
 	private readonly webviewItemDOM : HTMLDivElement
+	private readonly headerDOM : HTMLDivElement
 	private readonly id : number
 
 	constructor(id:number, closeAction: (self:SlackColumnView) => void) {
 		this.webviewItemDOM = document.createElement("div")
 		this.webviewItemDOM.setAttribute("class", "webview-item")
+		this.headerDOM = document.createElement("div")
+		this.headerDOM.setAttribute("class", "slack-column-header")
+		this.webviewItemDOM.appendChild(this.headerDOM)
 
 		this.id = id
-		console.log(`[WEB] ${this.id}`)
 		if(id == 0){
 			this.webviewItemDOM.setAttribute("style", "min-width:800px;")
 		}else{
@@ -35,16 +38,21 @@ class SlackColumnView
 
 			const closeButtonDOM = document.createElement("button")
 			closeButtonDOM.setAttribute("type", "button")
+			closeButtonDOM.setAttribute("class", "slack-column-header-close-button")
 			const closeButtonIconDivDOM = document.createElement("div")
 			closeButtonIconDivDOM.setAttribute("class", "fas fa-times")
 			closeButtonDOM.appendChild(closeButtonIconDivDOM)
 			closeButtonDOM.addEventListener("click", () => closeAction(this))
-			this.webviewItemDOM.appendChild(closeButtonDOM)
+			this.headerDOM.appendChild(closeButtonDOM)
 		}
 	}
 
 	getDOM(){return this.webviewItemDOM}
 	getId(){return this.id}
+	isHomeColumn() : boolean { return this.id == 0}
+	getHeaderHeight(){
+		return this.headerDOM.getBoundingClientRect().height
+	}
 }
 
 const slackWorkspaceView = new SlackWorkspaceViewModel()
@@ -111,10 +119,16 @@ function getSlackColumnViewDomRects() : [number[], number[], number[], number[]]
 	const heightList :number[] = []
 	slackWorkspaceView.getColumns().forEach(x => {
 		const rect = x.getDOM().getBoundingClientRect()
+		const y = x.isHomeColumn() ?
+			rect.y:
+			rect.y + x.getHeaderHeight()
+		const height = x.isHomeColumn() ?
+			rect.height:
+			rect.height - x.getHeaderHeight()
 		xPosList.push(rect.x)
-		yPosList.push(rect.y)
+		yPosList.push(y)
 		widthList.push(rect.width)
-		heightList.push(rect.height)
+		heightList.push(height)
 	})
 	return [xPosList,yPosList,widthList,heightList]
 }

@@ -119,14 +119,11 @@ export class IndexMainProcess {
 
 		ipcMain.on("update-column-position-reply", (event, xPosList: number[], yPosList: number[], widthList:number[], heightList:number[]) => {
 			this.workspaceModel.getColumns().forEach((column, i) => {
-				console.log(xPosList)
-				// todo: domから取得する
-				const columnHeaderHeight = 26
 				column.setSize(
 					xPosList[i],
-					yPosList[i] + columnHeaderHeight,
+					yPosList[i],
 					widthList[i],
-					heightList[i] - columnHeaderHeight)
+					heightList[i])
 			})
 		})
 	}
