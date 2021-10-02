@@ -103,11 +103,9 @@ export class IndexMainProcess {
 
 		ipcMain.on("on-added-slack-column", (ipcMainEvent, url) => {
 			const columnId = this.workspaceModel.getColumnNum()
-			const isFirstColumn = columnId == 0
 			const columnViewInfo = new SlackColumnViewInfo(
 					columnId,
-					url,
-				isFirstColumn ? 800 : 400
+					url
 			)
 			const slackColumnView = new SlackColumnView(columnViewInfo, this.rootWindow)
 			const slackColumnModel = new SlackColumnModel(columnId)
