@@ -1,34 +1,40 @@
 import {BrowserView, BrowserWindow, shell} from "electron";
+import {SlackColumnViewInfo} from "./slack-column-view-info";
 
-export class SlackColumnBaseUi
+export class SlackColumnView
 {
     parentWindow : BrowserWindow
     browserView : BrowserView
+    viewInfo : SlackColumnViewInfo
 
-    constructor(parentWindow:BrowserWindow, url:string) {
+    constructor(viewInfo : SlackColumnViewInfo,parentWindow:BrowserWindow) {
+        this.viewInfo = viewInfo
         this.parentWindow = parentWindow
 
         this.browserView = new BrowserView()
-        void this.browserView.webContents.loadURL(url)
+        void this.browserView.webContents.loadURL(this.viewInfo.url)
         this.browserView.webContents.addListener("new-window", (event, url) => {
             event.preventDefault()
             void shell.openExternal(url)
         })
 
-        this.browserView.setBounds({x:0,y:0,width:this.getWidth(),height:0})
+        this.browserView.setBounds({x:0,y:0,width:0,height:0})
         this.browserView.webContents.addListener("did-finish-load", () => {
-            const isThread = url.includes("thread")
+            const isThread = this.viewInfo.url.includes("thread")
             this.applyCSSForSlackColumn(this.browserView, isThread)
         })
         this.parentWindow.addBrowserView(this.browserView)
     }
 
-    setSize(x:number, y:number, height: number){
-        this.browserView.setBounds({
-            x: Math.round(x),
-            y: Math.round(y),
-            width: this.getWidth(),
-            height: Math.round(height)})
+    setSize(x:number, y:number, width:number, height: number){
+        this.browserView.setBounds(
+            {
+                x: Math.round(x),
+                y: Math.round(y),
+                width: Math.round(width),
+                height: Math.round(height)
+            }
+        )
     }
 
     delete(){
