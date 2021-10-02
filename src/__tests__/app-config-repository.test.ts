@@ -1,5 +1,5 @@
-import {AppConfigRepository} from "../app-config-repository";
-import {AppConfig, WorkspaceColumnConfig, WorkspaceConfig} from "../app-config";
+import {AppConfigRepository} from "../app-config/app-config-repository";
+import {AppConfig, WorkspaceColumnConfig, WorkspaceConfig} from "../app-config/app-config";
 import * as fs from "fs";
 
 const saveFileName = "test.json"
@@ -30,7 +30,7 @@ test("読み込みテスト", ()=>{
 
     const appConfigRepository = new AppConfigRepository()
     appConfigRepository.save(saveFileName, testAppConfig)
-    const appConfig = appConfigRepository.load(saveFileName)
+    const [appConfig,] : [AppConfig, boolean] = appConfigRepository.load(saveFileName)
     fs.unlinkSync(saveFileName)
 
     expect(appConfig.workspaces[0].workspace_id).toBe(testWorkspaceId)

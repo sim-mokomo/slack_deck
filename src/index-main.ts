@@ -1,8 +1,8 @@
-import {ipcMain, shell, BrowserWindow, IpcMainEvent} from "electron"
-import {AppConfig, WorkspaceColumnConfig} from "./app-config"
+import {ipcMain, shell, BrowserWindow, IpcMainEvent, app} from "electron"
+import {AppConfig, WorkspaceColumnConfig} from "./app-config/app-config"
 import { SlackService } from "./slack-service"
 import {AddSlackColumnRequest} from "./add-slack-column-request";
-import {AppConfigRepository} from "./app-config-repository";
+import {AppConfigRepository} from "./app-config/app-config-repository";
 import {SlackWorkspaceModel} from "./slack-workspace-model";
 import {SlackColumnModel} from "./slack-column-model";
 import {SlackColumnBasicUi} from "./slack-column-basic-ui";
@@ -29,7 +29,13 @@ export class IndexMainProcess {
 
 	init(): void {
 		ipcMain.on("init-index", (event) => {
-			this.appConfig = new AppConfigRepository().load(AppConfigFileName)
+			const appConfigRepository = new AppConfigRepository()
+			const [config, success] : [AppConfig, boolean] = appConfigRepository.load(AppConfigFileName)
+			this.appConfig = config
+			if(!success){
+				appConfigRepository.save(AppConfigFileName, AppConfig.default)
+			}
+
 			const workspaceConfig = this.appConfig.getWorkspaceConfigHead()
 			if(workspaceConfig == null){
 				return
@@ -80,7 +86,7 @@ export class IndexMainProcess {
 			this.workspaceModel.removeColumn(id)
 
 			const appConfigRepository = new AppConfigRepository()
-			const appConfig = appConfigRepository.load(AppConfigFileName)
+			const [appConfig,] : [AppConfig, boolean] = appConfigRepository.load(AppConfigFileName)
 			const workspaceConfig = appConfig.getWorkspaceConfigHead()
 			if(workspaceConfig == null){
 				return

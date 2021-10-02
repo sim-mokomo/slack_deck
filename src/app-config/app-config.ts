@@ -1,15 +1,16 @@
 export class AppConfig {
+	static default : AppConfig = new AppConfig()
 	workspaces: WorkspaceConfig[] = []
 
 	addWorkspaceColumnConfig(workspaceId: string, workspaceColumnConfig: WorkspaceColumnConfig): void {
-		const workspaceConfig = this.getWorkspaceConfig(workspaceId)
+		const workspaceConfig = this.findWorkspaceConfig(workspaceId)
 		if(workspaceConfig != null){
 			workspaceConfig.columns.push(workspaceColumnConfig)
 		}
 	}
 
 	removeWorkspaceColumnConfig(workspaceId: string, columnId: number): void {
-		const workspaceConfig = this.getWorkspaceConfig(workspaceId)
+		const workspaceConfig = this.findWorkspaceConfig(workspaceId)
 		if(workspaceConfig != null) {
 			workspaceConfig.columns = workspaceConfig.columns.filter(x => x.id != columnId)
 		}
@@ -19,9 +20,9 @@ export class AppConfig {
 		return this.workspaces[0]
 	}
 
-	getWorkspaceConfig(workspaceId:string) : WorkspaceConfig | null {
+	findWorkspaceConfig(workspaceId:string) : WorkspaceConfig | null {
 		const index = this.workspaces.findIndex(x => x.workspace_id == workspaceId)
-		if(index < 0 || index >= this.workspaces.length){
+		if(index < 0){
 			return null
 		}
 
@@ -31,8 +32,8 @@ export class AppConfig {
 
 
 export class WorkspaceConfig {
-	workspace_id
-	columns
+	workspace_id : string
+	columns : WorkspaceColumnConfig[]
 
 	constructor(workspaceId:string, columns:WorkspaceColumnConfig[]) {
 		this.workspace_id = workspaceId
@@ -41,9 +42,9 @@ export class WorkspaceConfig {
 }
 
 export class WorkspaceColumnConfig {
-	id
-	channel_id
-	thread_ts
+	id : number
+	channel_id : string
+	thread_ts : string
 
 	constructor(id: number, channelId: string, threadTs: string) {
 		this.id = id
