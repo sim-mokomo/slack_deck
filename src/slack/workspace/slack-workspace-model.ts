@@ -1,4 +1,4 @@
-import {SlackColumnModel} from "./slack-column/slack-column-model";
+import {SlackColumnModel} from "../column/slack-column-model";
 
 export class SlackWorkspaceModel {
     columnModels : SlackColumnModel[] = []

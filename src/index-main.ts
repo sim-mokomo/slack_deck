@@ -1,12 +1,12 @@
 import {ipcMain, shell, BrowserWindow, IpcMainEvent, app} from "electron"
 import {AppConfig, WorkspaceColumnConfig, WorkspaceConfig} from "./app-config/app-config"
-import { SlackService } from "./slack-service"
+import { SlackService } from "./slack/slack-service"
 import {AddSlackColumnRequest} from "./add-slack-column-request";
 import {AppConfigRepository} from "./app-config/app-config-repository";
-import {SlackWorkspaceModel} from "./slack-workspace-model";
-import {SlackColumnModel} from "./slack-column/slack-column-model";
-import {SlackColumnView} from "./slack-column/slack-column-view";
-import {SlackColumnViewInfo} from "./slack-column/slack-column-view-info";
+import {SlackWorkspaceModel} from "./slack/workspace/slack-workspace-model";
+import {SlackColumnModel} from "./slack/column/slack-column-model";
+import {SlackColumnView} from "./slack/column/slack-column-view";
+import {SlackColumnViewInfo} from "./slack/column/slack-column-view-info";
 const AppConfigFileName = "appconfig.json"
 
 export class IndexMainProcess {
@@ -53,7 +53,7 @@ export class IndexMainProcess {
 			this.addSlackColumnReply(event, requests)
 		})
 
-		ipcMain.on("add-slack-column-request", (event, arg) => {
+		ipcMain.on("add-column-request", (event, arg) => {
 			const workSpaceConfig = new AppConfigRepository().load(AppConfigFileName)[0].getWorkspaceConfigHead()
 			if(workSpaceConfig == null){
 				return
@@ -85,7 +85,7 @@ export class IndexMainProcess {
 			this.addSlackColumnReply(event, [request])
 		})
 
-		ipcMain.on("remove-slack-column-request", (event, arg) => {
+		ipcMain.on("remove-column-request", (event, arg) => {
 			const id = <number>arg
 			console.log(`delete id ${id}`)
 			this.workspaceModel.removeColumn(id)
@@ -101,7 +101,7 @@ export class IndexMainProcess {
 			appConfigRepository.save(AppConfigFileName, appConfig)
 		})
 
-		ipcMain.on("on-added-slack-column", (ipcMainEvent, url) => {
+		ipcMain.on("on-added-column", (ipcMainEvent, url) => {
 			const columnId = this.workspaceModel.getColumnNum()
 			const columnViewInfo = new SlackColumnViewInfo(
 					columnId,
@@ -117,7 +117,7 @@ export class IndexMainProcess {
 			this.onChangedSlackColumn()
 		})
 
-		ipcMain.on("update-slack-column-position-reply", (event, xPosList: number[], yPosList: number[], widthList:number[], heightList:number[]) => {
+		ipcMain.on("update-column-position-reply", (event, xPosList: number[], yPosList: number[], widthList:number[], heightList:number[]) => {
 			this.workspaceModel.getColumns().forEach((column, i) => {
 				console.log(xPosList)
 				// todo: domから取得する
@@ -140,9 +140,9 @@ export class IndexMainProcess {
 	}
 
 	addSlackColumnReply(event: IpcMainEvent, requests: AddSlackColumnRequest[],): void {
-		event.sender.send("add-slack-column-reply", JSON.stringify(requests))
+		event.sender.send("add-column-reply", JSON.stringify(requests))
 	}
 	updateSlackColumnPositionRequest() : void {
-		this.rootWindow.webContents.send("update-slack-column-position-request")
+		this.rootWindow.webContents.send("update-column-position-request")
 	}
 }
