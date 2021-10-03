@@ -14,4 +14,6 @@ export interface SandBox {
 	UpdateSlackColumnPositionReply: (xPosList: number[], yPosList: number[], widthList: number[], heightList: number[]) => void
 	ReloadWorkspaceRequest: () => void
 	ReloadWorkspaceReply : (receiver: (urlList:string[], idList: number[]) => void) => void
+	AddWorkspaceIconRequestM2R:(receiver: (workspaceIdList:string[]) => void) => void
+	OnClickedWorkspaceIconR2M: (workspaceId:string) => void
 }

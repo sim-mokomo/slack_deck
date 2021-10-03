@@ -1,5 +1,6 @@
 import { ipcRenderer, contextBridge } from "electron"
 import {AddSlackColumnRequest} from "./add-slack-column-request";
+import {AddWorkspaceIconRequest} from "./add-workspace-icon-request";
 
 contextBridge.exposeInMainWorld("api", {
 	InitIndex: () => ipcRenderer.send("init-index"),
@@ -43,4 +44,16 @@ contextBridge.exposeInMainWorld("api", {
 			receiver(urlList, idList)
 		})
 	},
+	AddWorkspaceIconRequestM2R: (receiver: (workspaceIdList:string[]) => void) => {
+		ipcRenderer.on("add-workspace-icon-reply", (event, arg) => {
+			const responses : AddWorkspaceIconRequest[] = []
+			Object.assign(responses, JSON.parse(arg))
+
+			const workspaceIdList:string[] = responses.map(x => x.workspaceId)
+			receiver(workspaceIdList)
+		})
+	},
+	OnClickedWorkspaceIconR2M: (workspaceId:string) => {
+		ipcRenderer.send("on-clicked-workspace-icon-r2m", workspaceId)
+	}
 })

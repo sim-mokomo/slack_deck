@@ -16,10 +16,6 @@ export class AppConfig {
 		}
 	}
 
-	getWorkspaceConfigHead() : WorkspaceConfig | null {
-		return this.workspaces[0]
-	}
-
 	findWorkspaceConfig(workspaceId:string) : WorkspaceConfig | null {
 		const index = this.workspaces.findIndex(x => x.workspace_id == workspaceId)
 		if(index < 0){
@@ -27,6 +23,18 @@ export class AppConfig {
 		}
 
 		return this.workspaces[index]
+	}
+
+	findWorkSpaceConfigByIndex(index:number) : WorkspaceConfig | null {
+		if(index < 0 || index >= this.workspaces.length){
+			return  null
+		}
+
+		return this.workspaces[index]
+	}
+
+	getWorkspaceConfigs(){
+		return this.workspaces
 	}
 }
 

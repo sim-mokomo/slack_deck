@@ -7,14 +7,19 @@ import {SlackWorkspaceModel} from "./slack/workspace/slack-workspace-model";
 import {SlackColumnModel} from "./slack/column/slack-column-model";
 import {SlackColumnView} from "./slack/column/slack-column-view";
 import {SlackColumnViewInfo} from "./slack/column/slack-column-view-info";
+import {AddWorkspaceIconRequest} from "./add-workspace-icon-request";
 const AppConfigFileName = "appconfig.json"
 
 export class IndexMainProcess {
 	workspaceModel : SlackWorkspaceModel
 	slackColumnViewList :  SlackColumnView[] = []
 	rootWindow : BrowserWindow
+	currentWorkspaceId : string
 
 	constructor(rootWindow:BrowserWindow) {
+		// todo: 現在選択しているIDを読み込むように
+		this.currentWorkspaceId = "T015W4C22TA"
+
 		this.rootWindow = rootWindow
 		// todo: ワークスペースを対象にしたカラムのリロードを行えるように
 		this.rootWindow.on("resized", () => {
@@ -35,13 +40,9 @@ export class IndexMainProcess {
 	init(): void {
 		ipcMain.on("init-index", (event) => {
 			// todo: ワークスペースの切り替えを行えるように
-			const appConfigRepository = new AppConfigRepository()
-			const [appConfig, success] : [AppConfig, boolean] = appConfigRepository.load(AppConfigFileName)
-			if(!success){
-				appConfigRepository.save(AppConfigFileName,  AppConfig.default)
-			}
-			const workspaceConfig = appConfig.getWorkspaceConfigHead()
+			const workspaceConfig = this.getCurrentWorkspaceConfig()
 			if(workspaceConfig == null){
+				new AppConfigRepository().save(AppConfigFileName,  AppConfig.default)
 				return
 			}
 
@@ -53,10 +54,20 @@ export class IndexMainProcess {
 					),
 			)
 			this.addSlackColumnReply(event, requests)
+
+			{
+				const [appConfig, ] : [AppConfig, boolean] = new AppConfigRepository().load(AppConfigFileName)
+				const requests = appConfig.getWorkspaceConfigs().map(x => {
+					return new AddWorkspaceIconRequest(
+						x.workspace_id
+					)
+				})
+				this.addWorkspaceIconsReply(event, requests)
+			}
 		})
 
 		ipcMain.on("add-column-request", (event, arg) => {
-			const workSpaceConfig = new AppConfigRepository().load(AppConfigFileName)[0].getWorkspaceConfigHead()
+			const workSpaceConfig = this.getCurrentWorkspaceConfig()
 			if(workSpaceConfig == null){
 				return
 			}
@@ -93,7 +104,7 @@ export class IndexMainProcess {
 
 			const appConfigRepository = new AppConfigRepository()
 			const [appConfig,] : [AppConfig, boolean] = appConfigRepository.load(AppConfigFileName)
-			const workspaceConfig = appConfig.getWorkspaceConfigHead()
+			const workspaceConfig = this.getCurrentWorkspaceConfig()
 			if(workspaceConfig == null){
 				return
 			}
@@ -130,24 +141,24 @@ export class IndexMainProcess {
 		})
 
 		ipcMain.on("reload-workspace-request", (event) => {
-			// note: ModelとBrowserViewの解放
-			this.workspaceModel.removeAll()
-
 			// todo: renderer側の再構築
-			const appConfigRepository = new AppConfigRepository()
-			const [appConfig,] : [AppConfig,boolean] = appConfigRepository.load(AppConfigFileName)
-			const workspaceConfig = appConfig.getWorkspaceConfigHead()
+			const workspaceConfig = this.getCurrentWorkspaceConfig()
 			if(workspaceConfig == null){
 				return
 			}
 
-			const addSlackColumnRequests = workspaceConfig.columns.map((x) => {
-				return new AddSlackColumnRequest(
-					SlackService.getWebViewURL(workspaceConfig.workspace_id, x.channel_id, x.thread_ts),
-					x.id
-				)
-			})
-			this.reloadWorkspaceReply(event, addSlackColumnRequests)
+			this.reloadWorkspaceReplyByWorkspaceConfig(event, workspaceConfig)
+		})
+
+		ipcMain.on("on-clicked-workspace-icon-r2m", (event, arg) => {
+			const workspaceId = <string>(arg)
+
+			const [appConfig,] : [AppConfig, boolean] = new AppConfigRepository().load(AppConfigFileName)
+			const workspaceConfig = appConfig.findWorkspaceConfig(workspaceId)
+			if(workspaceConfig != null){
+				this.currentWorkspaceId = workspaceId
+				this.reloadWorkspaceReplyByWorkspaceConfig(event , workspaceConfig)
+			}
 		})
 	}
 
@@ -167,5 +178,31 @@ export class IndexMainProcess {
 	}
 	reloadWorkspaceReply(event: IpcMainEvent, requests : AddSlackColumnRequest[]) :void {
 		event.sender.send("reload-workspace-reply", JSON.stringify(requests))
+	}
+
+	getCurrentWorkspaceConfig(): WorkspaceConfig | null {
+		const appConfigRepository = new AppConfigRepository()
+		const [appConfig, success] : [AppConfig, boolean] = appConfigRepository.load(AppConfigFileName)
+		if(!success){
+			appConfigRepository.save(AppConfigFileName,  AppConfig.default)
+		}
+		const workspaceConfig = appConfig.findWorkspaceConfig(this.currentWorkspaceId)
+		return workspaceConfig
+	}
+
+	addWorkspaceIconsReply(event:IpcMainEvent, requests: AddWorkspaceIconRequest[]) : void {
+		event.sender.send("add-workspace-icon-reply", JSON.stringify(requests))
+	}
+
+	reloadWorkspaceReplyByWorkspaceConfig(event:IpcMainEvent, workspaceConifg:WorkspaceConfig){
+		// note: ModelとBrowserViewの解放
+		this.workspaceModel.removeAll()
+		const addSlackColumnRequests = workspaceConifg.columns.map((x) => {
+			return new AddSlackColumnRequest(
+				SlackService.getWebViewURL(workspaceConifg.workspace_id, x.channel_id, x.thread_ts),
+				x.id
+			)
+		})
+		this.reloadWorkspaceReply(event, addSlackColumnRequests)
 	}
 }
