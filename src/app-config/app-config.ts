@@ -3,30 +3,30 @@ export class AppConfig {
 	workspaces: WorkspaceConfig[] = []
 
 	addWorkspaceColumnConfig(workspaceId: string, workspaceColumnConfig: WorkspaceColumnConfig): void {
-		const workspaceConfig = this.findWorkspaceConfig(workspaceId)
+		const workspaceConfig = this.findWorkspaceConfigById(workspaceId)
 		if(workspaceConfig != null){
 			workspaceConfig.columns.push(workspaceColumnConfig)
 		}
 	}
 
 	removeWorkspaceColumnConfig(workspaceId: string, columnId: number): void {
-		const workspaceConfig = this.findWorkspaceConfig(workspaceId)
+		const workspaceConfig = this.findWorkspaceConfigById(workspaceId)
 		if(workspaceConfig != null) {
 			workspaceConfig.columns = workspaceConfig.columns.filter(x => x.id != columnId)
 		}
 	}
 
-	getWorkspaceConfigHead() : WorkspaceConfig | null {
-		return this.workspaces[0]
-	}
-
-	findWorkspaceConfig(workspaceId:string) : WorkspaceConfig | null {
+	findWorkspaceConfigById(workspaceId:string) : WorkspaceConfig | null {
 		const index = this.workspaces.findIndex(x => x.workspace_id == workspaceId)
 		if(index < 0){
 			return null
 		}
 
 		return this.workspaces[index]
+	}
+
+	getWorkspaceConfigs(){
+		return this.workspaces
 	}
 }
 

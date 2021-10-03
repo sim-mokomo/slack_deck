@@ -21,7 +21,7 @@ test("カラムの追加", () => {
             testIdAdded,
             testChannelAdded,
             testTsAdded))
-    const workspaceConfig = appConfig.findWorkspaceConfig(workspaceId)
+    const workspaceConfig = appConfig.findWorkspaceConfigById(workspaceId)
     if(workspaceConfig != null) {
         expect(workspaceConfig.columns.length).toBe(2)
         expect(workspaceConfig.columns[1].id).toBe(testIdAdded)
@@ -32,14 +32,14 @@ test("カラムの追加", () => {
 
 test("カラムの削除", () => {
     appConfig.removeWorkspaceColumnConfig(workspaceId, 0)
-    const workspaceConfig = appConfig.findWorkspaceConfig(workspaceId)
+    const workspaceConfig = appConfig.findWorkspaceConfigById(workspaceId)
     if(workspaceConfig != null) {
         expect(workspaceConfig.columns.length).toBe(0)
     }
 })
 
 test("カラムの取得", () => {
-    const workspaceConfig = appConfig.findWorkspaceConfig(workspaceId)
+    const workspaceConfig = appConfig.findWorkspaceConfigById(workspaceId)
     expect(workspaceConfig).not.toBeNull()
     if(workspaceConfig != null) {
         expect(workspaceConfig.columns[0].id).toBe(0)

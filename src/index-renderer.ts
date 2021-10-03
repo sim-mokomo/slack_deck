@@ -108,12 +108,25 @@ window.onload = () => {
 			webViewContainerDOM.removeChild(webViewContainerDOM.firstChild)
 		}
 		slackWorkspaceView.removeAll()
-		
+
 		for (let i = 0; i < idList.length; i++) {
 			AddSlackColumn(urlList[i], idList[i])
 		}
 
 		updateSlackColumnPositionReply()
+	})
+
+	// note: workspace切り替えアイコン
+	window.api.AddWorkspaceIconRequestM2R(workspaceIdList => {
+		const workspaceIconContainer = document.getElementsByClassName("workspace-icon-container")[0]
+		for (const workspaceId of workspaceIdList) {
+			const workspaceIconButtonDOM = document.createElement("button")
+			workspaceIconButtonDOM.innerText = workspaceId
+			workspaceIconButtonDOM.addEventListener("click", () => {
+				window.api.OnClickedWorkspaceIconR2M(workspaceId)
+			})
+			workspaceIconContainer.appendChild(workspaceIconButtonDOM)
+		}
 	})
 
 	window.api.InitIndex()

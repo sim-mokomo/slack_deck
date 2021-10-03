@@ -133,3 +133,4 @@ temp/
 src/*.js
 appconfig.json
 .idea
+out
