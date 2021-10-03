@@ -16,8 +16,6 @@ document.onclick = (event) => {
         }
         layout = layoutDOMList[0]
         observer = new MutationObserver(records => {
-            console.log(records)
-
             if(layout == null){
                 return
             }

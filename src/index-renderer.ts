@@ -32,6 +32,7 @@ class SlackColumnView
 
 		this.id = id
 		if(id == 0){
+			// todo: widthを設定から変えることができるように
 			this.webviewItemDOM.setAttribute("style", "min-width:800px;")
 		}else{
 			this.webviewItemDOM.setAttribute("style", "min-width:400px;")

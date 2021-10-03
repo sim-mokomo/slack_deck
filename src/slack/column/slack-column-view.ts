@@ -12,7 +12,6 @@ export class SlackColumnView
         this.viewInfo = viewInfo
         this.parentWindow = parentWindow
 
-        console.log(path.join(__dirname, "slack-column-view-preload.js"))
         this.browserView = new BrowserView({
             webPreferences: {
                 nodeIntegration: false,

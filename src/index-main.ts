@@ -33,6 +33,7 @@ export class IndexMainProcess {
 
 	init(): void {
 		ipcMain.on("init-index", (event) => {
+			// todo: ワークスペースの切り替えを行えるように
 			const appConfigRepository = new AppConfigRepository()
 			const [appConfig, success] : [AppConfig, boolean] = appConfigRepository.load(AppConfigFileName)
 			if(!success){
@@ -87,7 +88,6 @@ export class IndexMainProcess {
 
 		ipcMain.on("remove-column-request", (event, arg) => {
 			const id = <number>arg
-			console.log(`delete id ${id}`)
 			this.workspaceModel.removeColumn(id)
 
 			const appConfigRepository = new AppConfigRepository()

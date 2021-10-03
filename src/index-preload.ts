@@ -29,5 +29,6 @@ contextBridge.exposeInMainWorld("api", {
 	},
 	UpdateSlackColumnPositionReply: (xPosList:number[], yPosList:number[], widthList:number[], heightList:number[]) => {
 		ipcRenderer.send("update-column-position-reply", xPosList,yPosList,widthList,heightList)
-	}
+	},
+
 })
