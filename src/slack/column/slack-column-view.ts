@@ -1,5 +1,6 @@
 import {BrowserView, BrowserWindow, shell} from "electron";
 import {SlackColumnViewInfo} from "./slack-column-view-info";
+import path = require("path")
 
 export class SlackColumnView
 {
@@ -11,7 +12,15 @@ export class SlackColumnView
         this.viewInfo = viewInfo
         this.parentWindow = parentWindow
 
-        this.browserView = new BrowserView()
+        console.log(path.join(__dirname, "slack-column-view-preload.js"))
+        this.browserView = new BrowserView({
+            webPreferences: {
+                nodeIntegration: false,
+                devTools: true,
+                contextIsolation: true,
+                preload : path.join(__dirname, "slack-column-view-preload.js")
+            }
+        })
         void this.browserView.webContents.loadURL(this.viewInfo.url)
         this.browserView.webContents.addListener("new-window", (event, url) => {
             event.preventDefault()
@@ -43,19 +52,32 @@ export class SlackColumnView
     }
 
     getWidth() : number {
-        return 0
+        return this.browserView.getBounds().width
     }
 
     applyCSSForSlackColumn(browserView : BrowserView, isThread: boolean) : void {
-        const commonCSSContents = [
-            ".p-top_nav--windows:after, .p-top_nav button, .p-top_nav__help__badge--dot {visibility: hidden;}",
-            ".p-client { grid-template-rows: 0px auto min-content !important; }",
-            ".p-ia__view_header.p-ia__view-header--with-sidebar-button, .p-ia__view_header:not(.p-ia__view_header--with-history){visibility: hidden;}",
-            ".p-classic_nav__model__title__name__button {visibility: visible; overflow: visible !important;}",
-            `.main .webview-container .webview-item { min-width: ${this.getWidth()}px !important;}`,
-        ]
-        for (const commonCSSContent of commonCSSContents) {
-            void browserView.webContents.insertCSS(commonCSSContent)
+        if(this.viewInfo.id == 0){
+            const commonCSSContents = [
+                ".p-top_nav--windows:after, .p-top_nav button, .p-top_nav__help__badge--dot {visibility: hidden;}",
+                ".p-client { grid-template-rows: 0px auto min-content !important; }",
+                ".p-ia__view_header.p-ia__view-header--with-sidebar-button, .p-ia__view_header:not(.p-ia__view_header--with-history){visibility: hidden;}",
+                ".p-classic_nav__model__title__name__button {visibility: visible; overflow: visible !important;}",
+                `.main .webview-container .webview-item { min-width: ${this.getWidth()}px !important;}`,
+            ]
+            for (const commonCSSContent of commonCSSContents) {
+                void browserView.webContents.insertCSS(commonCSSContent)
+            }
+        }else{
+            const commonCSSContents = [
+                ".p-top_nav--windows:after, .p-top_nav button, .p-top_nav__help__badge--dot {visibility: hidden;}",
+                ".p-client { grid-template-rows: 0px auto min-content !important; }",
+                ".p-ia__view_header.p-ia__view-header--with-sidebar-button, .p-ia__view_header:not(.p-ia__view_header--with-history){visibility: hidden;}",
+                ".p-classic_nav__model__title__name__button {visibility: visible; overflow: visible !important;}",
+                `.main .webview-container .webview-item { min-width: ${this.getWidth()}px !important;}`,
+            ]
+            for (const commonCSSContent of commonCSSContents) {
+                void browserView.webContents.insertCSS(commonCSSContent)
+            }
         }
 
         if (!isThread) {
@@ -67,6 +89,7 @@ export class SlackColumnView
             ".p-threads_footer__input_container {min-height: 0px !important;}",
             "button[data-qa='close_flexpane']{visibility: hidden;}",
             `.main .webview-container .webview-item { min-width: ${this.getWidth()}px !important;}`,
+            `.p-workspace-layout { grid-template-columns: auto ${this.getWidth()}px !important; grid-template-areas: 'p-workspace__primary_view p-workspace__secondary_view';}`,
         ]
 
         for (const threadCSSContent of threadCSSContents) {
