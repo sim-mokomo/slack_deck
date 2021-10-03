@@ -22,4 +22,11 @@ export class SlackWorkspaceModel {
             this.onDelete(id)
         }
     }
+
+    removeAll() : void {
+        for (const columnModel of this.columnModels) {
+            this.onDelete(columnModel.id)
+        }
+        this.columnModels = []
+    }
 }

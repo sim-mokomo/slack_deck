@@ -21,8 +21,7 @@ document.onclick = (event) => {
             }
             const secondaryViewList = layout.getElementsByClassName("p-workspace__secondary_view")
             const secondaryViewExists = secondaryViewList.length > 0
-
-
+            
             const styleList = layout.getElementsByTagName("style")
             for (const styleListElement of styleList) {
                 const isLayoutCSS = styleListElement.innerText.includes(".p-workspace-layout")

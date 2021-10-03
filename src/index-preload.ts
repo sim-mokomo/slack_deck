@@ -30,5 +30,17 @@ contextBridge.exposeInMainWorld("api", {
 	UpdateSlackColumnPositionReply: (xPosList:number[], yPosList:number[], widthList:number[], heightList:number[]) => {
 		ipcRenderer.send("update-column-position-reply", xPosList,yPosList,widthList,heightList)
 	},
+	ReloadWorkspaceRequest: () => {
+		ipcRenderer.send("reload-workspace-request");
+	},
+	ReloadWorkspaceReply: (receiver: (urlList: string[], idList: number[]) => void) => {
+		ipcRenderer.on("reload-workspace-reply", (event, arg) => {
+			const responses: AddSlackColumnRequest[] = []
+			Object.assign(responses, JSON.parse(arg))
 
+			const urlList = responses.map(x => x.url)
+			const idList = responses.map(x => x.id)
+			receiver(urlList, idList)
+		})
+	},
 })

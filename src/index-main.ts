@@ -16,7 +16,7 @@ export class IndexMainProcess {
 
 	constructor(rootWindow:BrowserWindow) {
 		this.rootWindow = rootWindow
-
+		// todo: ワークスペースを対象にしたカラムのリロードを行えるように
 		this.rootWindow.on("resized", () => {
 			this.onChangedWindow()
 		})
@@ -28,6 +28,7 @@ export class IndexMainProcess {
 		this.workspaceModel.onDelete = (columnId : number) => {
 			const slackColumnView = this.slackColumnViewList.find(x => x.viewInfo.id == columnId)
 			slackColumnView?.delete()
+			this.slackColumnViewList = this.slackColumnViewList.filter(x => x.viewInfo.id != columnId)
 		}
 	}
 
@@ -118,6 +119,7 @@ export class IndexMainProcess {
 		})
 
 		ipcMain.on("update-column-position-reply", (event, xPosList: number[], yPosList: number[], widthList:number[], heightList:number[]) => {
+			console.log(this.workspaceModel.getColumnNum())
 			this.workspaceModel.getColumns().forEach((column, i) => {
 				column.setSize(
 					xPosList[i],
@@ -125,6 +127,27 @@ export class IndexMainProcess {
 					widthList[i],
 					heightList[i])
 			})
+		})
+
+		ipcMain.on("reload-workspace-request", (event) => {
+			// note: ModelとBrowserViewの解放
+			this.workspaceModel.removeAll()
+
+			// todo: renderer側の再構築
+			const appConfigRepository = new AppConfigRepository()
+			const [appConfig,] : [AppConfig,boolean] = appConfigRepository.load(AppConfigFileName)
+			const workspaceConfig = appConfig.getWorkspaceConfigHead()
+			if(workspaceConfig == null){
+				return
+			}
+
+			const addSlackColumnRequests = workspaceConfig.columns.map((x) => {
+				return new AddSlackColumnRequest(
+					SlackService.getWebViewURL(workspaceConfig.workspace_id, x.channel_id, x.thread_ts),
+					x.id
+				)
+			})
+			this.reloadWorkspaceReply(event, addSlackColumnRequests)
 		})
 	}
 
@@ -141,5 +164,8 @@ export class IndexMainProcess {
 	}
 	updateSlackColumnPositionRequest() : void {
 		this.rootWindow.webContents.send("update-column-position-request")
+	}
+	reloadWorkspaceReply(event: IpcMainEvent, requests : AddSlackColumnRequest[]) :void {
+		event.sender.send("reload-workspace-reply", JSON.stringify(requests))
 	}
 }
