@@ -72,6 +72,7 @@ export class SlackColumnView
                 ".p-client { grid-template-rows: 0px auto min-content !important; }",
                 ".p-ia__view_header.p-ia__view-header--with-sidebar-button, .p-ia__view_header:not(.p-ia__view_header--with-history){visibility: hidden;}",
                 ".p-classic_nav__model__title__name__button {visibility: visible; overflow: visible !important;}",
+                `.p-workspace__sidebar {visibility: hidden;}`,
                 `.main .webview-container .webview-item { min-width: ${this.getWidth()}px !important;}`,
             ]
             for (const commonCSSContent of commonCSSContents) {
@@ -83,12 +84,18 @@ export class SlackColumnView
             return
         }
         const threadCSSContents = [
-            ".p-workspace__primary_view{ visibility: hidden;} .p-workspace__sidebar{ visibility: hidden; }",
-            `.p-workspace-layout .p-workspace__secondary_view { width: ${this.getWidth()}px; }`,
-            ".p-threads_footer__input_container {min-height: 0px !important;}",
-            "button[data-qa='close_flexpane']{visibility: hidden;}",
+            ".p-top_nav--windows:after, .p-top_nav button, .p-top_nav__help__badge--dot {visibility: hidden;}",
+            ".p-client { grid-template-rows: 0px auto min-content !important; }",
+            ".p-ia__view_header.p-ia__view-header--with-sidebar-button, .p-ia__view_header:not(.p-ia__view_header--with-history){visibility: hidden;}",
+            ".p-classic_nav__model__title__name__button {visibility: visible; overflow: visible !important;}",
             `.main .webview-container .webview-item { min-width: ${this.getWidth()}px !important;}`,
-            `.p-workspace-layout { grid-template-columns: auto ${this.getWidth()}px !important; grid-template-areas: 'p-workspace__primary_view p-workspace__secondary_view';}`,
+            `.p-workspace-layout {
+                grid-template-columns: auto 99% !important;
+                grid-template-areas: 'p-workspace__primary_view p-workspace__secondary_view !important';
+            }`,
+            `.p-workspace__sidebar {visibility: hidden;}`,
+            `.p-workspace__primary_view{ visibility: hidden;}`,
+            "button[data-qa='close_flexpane']{visibility: hidden;}",
         ]
 
         for (const threadCSSContent of threadCSSContents) {
