@@ -1,5 +1,6 @@
 export class AppConfig {
 	static default : AppConfig = new AppConfig()
+	current_workspace_id = ""
 	workspaces: WorkspaceConfig[] = []
 
 	addWorkspaceColumnConfig(workspaceId: string, workspaceColumnConfig: WorkspaceColumnConfig): void {

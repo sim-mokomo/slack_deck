@@ -14,11 +14,16 @@ export class IndexMainProcess {
 	workspaceModel : SlackWorkspaceModel
 	slackColumnViewList :  SlackColumnView[] = []
 	rootWindow : BrowserWindow
-	currentWorkspaceId : string
+	currentWorkspaceId  = ""
 
 	constructor(rootWindow:BrowserWindow) {
-		// todo: 現在選択しているIDを読み込むように
-		this.currentWorkspaceId = "<workspace_id>"
+		const [appConfig, success] = new AppConfigRepository().load(AppConfigFileName)
+		if(!success){
+			new AppConfigRepository().save(AppConfigFileName,  AppConfig.default)
+		}else{
+			this.currentWorkspaceId = appConfig.current_workspace_id
+		}
+
 
 		this.rootWindow = rootWindow
 		// todo: ワークスペースを対象にしたカラムのリロードを行えるように
@@ -39,23 +44,8 @@ export class IndexMainProcess {
 
 	init(): void {
 		ipcMain.on("init-index", (event) => {
-			// todo: ワークスペースの切り替えを行えるように
-			const workspaceConfig = this.getCurrentWorkspaceConfig()
-			if(workspaceConfig == null){
-				new AppConfigRepository().save(AppConfigFileName,  AppConfig.default)
-				return
-			}
-
-			const requests = workspaceConfig.columns.map(
-				x =>
-					new AddSlackColumnRequest(
-						SlackService.getWebViewURL(workspaceConfig.workspace_id, x.channel_id, x.thread_ts),
-						x.id
-					),
-			)
-			this.addSlackColumnReply(event, requests)
-
 			{
+				// ワークスペースアイコン追加
 				const [appConfig, ] : [AppConfig, boolean] = new AppConfigRepository().load(AppConfigFileName)
 				const requests = appConfig.getWorkspaceConfigs().map(x => {
 					return new AddWorkspaceIconRequest(
@@ -63,6 +53,23 @@ export class IndexMainProcess {
 					)
 				})
 				this.addWorkspaceIconsReply(event, requests)
+			}
+
+			{
+				// カラム表示
+				const workspaceConfig = this.getCurrentWorkspaceConfig()
+				if(workspaceConfig == null){
+					return
+				}
+
+				const requests = workspaceConfig.columns.map(
+					x =>
+						new AddSlackColumnRequest(
+							SlackService.getWebViewURL(workspaceConfig.workspace_id, x.channel_id, x.thread_ts),
+							x.id
+						),
+				)
+				this.addSlackColumnReply(event, requests)
 			}
 		})
 
@@ -153,10 +160,13 @@ export class IndexMainProcess {
 		ipcMain.on("on-clicked-workspace-icon-r2m", (event, arg) => {
 			const workspaceId = <string>(arg)
 
-			const [appConfig,] : [AppConfig, boolean] = new AppConfigRepository().load(AppConfigFileName)
+			const appConfigRepository = new AppConfigRepository()
+			const [appConfig,] : [AppConfig, boolean] = appConfigRepository.load(AppConfigFileName)
 			const workspaceConfig = appConfig.findWorkspaceConfigById(workspaceId)
 			if(workspaceConfig != null){
 				this.currentWorkspaceId = workspaceId
+				appConfig.current_workspace_id = this.currentWorkspaceId
+				appConfigRepository.save(AppConfigFileName, appConfig)
 				this.reloadWorkspaceReplyByWorkspaceConfig(event , workspaceConfig)
 			}
 		})
