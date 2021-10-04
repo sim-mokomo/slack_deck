@@ -1,10 +1,10 @@
 {
-    "workspaces": [
-        {
-            "workspace_id": "<ここに自信のSlackWorkSpaceIdを入力してください>",
-            "columns": [
-                
-            ]
-        }
-    ]
+	"current_workspace_id": "",
+	"workspaces": [
+		{
+			"workspace_id": "<ここに自身のWorkspaceIdを入力する>",
+			"columns": [
+			]
+		}
+	]
 }
