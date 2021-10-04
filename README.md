@@ -13,7 +13,7 @@ SlackをTweetDeckのような表示にすることが可能です。
 
 1. appconfig.jsonを設定する
 
-アプリを動作させるために `appconfig.json` の設定が必要です。  
+アプリを動作させるために `<root>/appconfig.json` の設定が必要です。  
 デフォルトでは配置されていないので、テンプレート用のファイル(`<root>/appconfig-template.json`)をコピーして作成してください。  
   
 以下の箇所に自身のWorkspaceIdを設定してください。  
