@@ -1,6 +1,6 @@
 import { ipcRenderer, contextBridge } from "electron"
-import {AddSlackColumnRequest} from "./add-slack-column-request";
-import {AddWorkspaceIconRequest} from "./add-workspace-icon-request";
+import {AddSlackColumnRequest} from "../add-slack-column-request";
+import {AddWorkspaceIconRequest} from "../add-workspace-icon-request";
 
 contextBridge.exposeInMainWorld("api", {
 	InitIndex: () => ipcRenderer.send("init-index"),
