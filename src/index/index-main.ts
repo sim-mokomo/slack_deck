@@ -5,15 +5,15 @@ import {AddSlackColumnRequest} from "../connection/add-slack-column-request";
 import {AppConfigRepository} from "../app-config/app-config-repository";
 import {SlackWorkspaceModel} from "../slack/workspace/slack-workspace-model";
 import {SlackColumnModel} from "../slack/column/slack-column-model";
-import {SlackColumnView} from "../slack/column/slack-column-view";
-import {SlackColumnViewInfo} from "../slack/column/slack-column-view-info";
+import {SlackColumnBrowserView} from "../slack/column/slack-column-browser-view";
+import {SlackColumnBrowserViewInfo} from "../slack/column/slack-column-browser-view-info";
 import {AddWorkspaceIconRequest} from "../connection/add-workspace-icon-request";
 import {ChannelDefine} from "../connection/channel-define";
 const AppConfigFileName = "appconfig.json"
 
 export class IndexMainProcess {
 	workspaceModel : SlackWorkspaceModel
-	slackColumnViewList :  SlackColumnView[] = []
+	slackColumnViewList :  SlackColumnBrowserView[] = []
 	rootWindow : BrowserWindow
 	currentWorkspaceId  = ""
 
@@ -24,7 +24,6 @@ export class IndexMainProcess {
 		}else{
 			this.currentWorkspaceId = appConfig.current_workspace_id
 		}
-
 
 		this.rootWindow = rootWindow
 		// todo: ワークスペースを対象にしたカラムのリロードを行えるように
@@ -123,11 +122,11 @@ export class IndexMainProcess {
 
 		ipcMain.on(ChannelDefine.onAddedSlackColumnR2M, (ipcMainEvent, url) => {
 			const columnId = this.workspaceModel.getColumnNum()
-			const columnViewInfo = new SlackColumnViewInfo(
+			const columnViewInfo = new SlackColumnBrowserViewInfo(
 					columnId,
 					url
 			)
-			const slackColumnView = new SlackColumnView(columnViewInfo, this.rootWindow)
+			const slackColumnView = new SlackColumnBrowserView(columnViewInfo, this.rootWindow)
 			const slackColumnModel = new SlackColumnModel(columnId)
 			slackColumnModel.onChangedSize = (x,y,width, height) => {
 				slackColumnView.setSize(x, y, width, height)

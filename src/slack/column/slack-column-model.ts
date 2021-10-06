@@ -1,5 +1,3 @@
-import {SlackColumnView} from "./slack-column-view";
-
 export class SlackColumnModel {
     id: number
     posX : number

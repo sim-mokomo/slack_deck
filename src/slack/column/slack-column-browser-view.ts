@@ -1,14 +1,14 @@
 import {BrowserView, BrowserWindow, shell} from "electron";
-import {SlackColumnViewInfo} from "./slack-column-view-info";
+import {SlackColumnBrowserViewInfo} from "./slack-column-browser-view-info";
 import path = require("path")
 
-export class SlackColumnView
+export class SlackColumnBrowserView
 {
     parentWindow : BrowserWindow
     browserView : BrowserView
-    viewInfo : SlackColumnViewInfo
+    viewInfo : SlackColumnBrowserViewInfo
 
-    constructor(viewInfo : SlackColumnViewInfo,parentWindow:BrowserWindow) {
+    constructor(viewInfo : SlackColumnBrowserViewInfo, parentWindow:BrowserWindow) {
         this.viewInfo = viewInfo
         this.parentWindow = parentWindow
 

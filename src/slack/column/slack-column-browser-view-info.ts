@@ -1,4 +1,4 @@
-export class SlackColumnViewInfo{
+export class SlackColumnBrowserViewInfo {
     id : number
     url : string
 
