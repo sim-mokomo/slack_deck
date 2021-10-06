@@ -152,7 +152,6 @@ export class IndexMainProcess {
 		})
 
 		ipcMain.on(ChannelDefine.reloadAppR2M, (event) => {
-			// todo: renderer側の再構築
 			const workspaceConfig = this.getCurrentWorkspaceConfig()
 			if(workspaceConfig == null){
 				return
@@ -208,14 +207,14 @@ export class IndexMainProcess {
 		event.sender.send(ChannelDefine.addWorkspaceIconM2R, JSON.stringify(requests))
 	}
 
-	reloadWorkspaceReplyByWorkspaceConfig(event:IpcMainEvent, workspaceConifg:WorkspaceConfig){
+	reloadWorkspaceReplyByWorkspaceConfig(event:IpcMainEvent, workspaceConfig:WorkspaceConfig){
 		// note: ModelとBrowserViewの解放
 		this.workspaceModel.removeAll()
-		const addSlackColumnRequests = workspaceConifg.columns.map((x) => {
+		const addSlackColumnRequests = workspaceConfig.columns.map((x) => {
 			return new AddSlackColumnRequest({
 				columnViewInfo: {
 					id: x.id,
-					url: SlackService.getWebViewURL(workspaceConifg.workspace_id, x.channel_id, x.thread_ts),
+					url: SlackService.getWebViewURL(workspaceConfig.workspace_id, x.channel_id, x.thread_ts),
 				}
 			})
 		})
