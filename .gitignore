@@ -130,7 +130,7 @@ temp/
 
 # End of https://www.toptal.com/developers/gitignore/api/node
 
-src/*.js
+src/**/*.js
 appconfig.json
 .idea
 out
