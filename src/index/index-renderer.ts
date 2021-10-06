@@ -85,8 +85,12 @@ window.onload = () => {
 		})
 	}
 
-	window.api.AddSlackColumnReply((url: string, id: number) => {
-		AddSlackColumn(url, id)
+	window.api.AddSlackColumnReply((urlList: string[], idList: number[]) => {
+		for (let i = 0; i < idList.length; i++) {
+			const url = urlList[i]
+			const id = idList[i]
+			AddSlackColumn(url, id)
+		}
 	})
 
 	window.api.UpdateSlackColumnPositionRequest(()=>{

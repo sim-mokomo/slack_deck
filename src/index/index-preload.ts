@@ -5,14 +5,13 @@ import {ChannelDefine} from "../connection/channel-define";
 
 contextBridge.exposeInMainWorld("api", {
 	InitIndex: () => ipcRenderer.send(ChannelDefine.onInitializeIndexR2M),
-	AddSlackColumnReply: (listener: (url: string, id: number) => void) => {
+	AddSlackColumnReply: (listener: (urlList: string[], idList: number[]) => void) => {
 		ipcRenderer.on(ChannelDefine.addSlackColumnM2R, (event, arg) => {
 			const responses: AddSlackColumnRequest[] = []
 			Object.assign(responses, JSON.parse(arg))
-
-			for (const response of responses) {
-				listener(response.url, response.id)
-			}
+			const urlList = responses.map(x => x.url)
+			const idList = responses.map(x => x.id)
+			listener(urlList, idList)
 		})
 	},
 	AddSlackColumnRequest: (url: string) => {

@@ -6,7 +6,7 @@ declare global {
 
 export interface SandBox {
 	InitIndex: () => void
-	AddSlackColumnReply: (listener: (url: string, id: number) => void) => void
+	AddSlackColumnReply: (listener: (url: string[], id: number[]) => void) => void
 	AddSlackColumnRequest: (url: string,) => void
 	RemoveSlackColumnRequest: (id: number) => void
 	OnAddedSlackColumn: (url: string) => void
