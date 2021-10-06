@@ -1,14 +1,14 @@
 import {ipcMain, shell, BrowserWindow, IpcMainEvent, app} from "electron"
 import {AppConfig, WorkspaceColumnConfig, WorkspaceConfig} from "../app-config/app-config"
 import { SlackService } from "../slack/slack-service"
-import {AddSlackColumnRequest} from "../add-slack-column-request";
+import {AddSlackColumnRequest} from "../connection/add-slack-column-request";
 import {AppConfigRepository} from "../app-config/app-config-repository";
 import {SlackWorkspaceModel} from "../slack/workspace/slack-workspace-model";
 import {SlackColumnModel} from "../slack/column/slack-column-model";
 import {SlackColumnView} from "../slack/column/slack-column-view";
 import {SlackColumnViewInfo} from "../slack/column/slack-column-view-info";
-import {AddWorkspaceIconRequest} from "../add-workspace-icon-request";
-import {ChannelDefine} from "../channel-define";
+import {AddWorkspaceIconRequest} from "../connection/add-workspace-icon-request";
+import {ChannelDefine} from "../connection/channel-define";
 const AppConfigFileName = "appconfig.json"
 
 export class IndexMainProcess {

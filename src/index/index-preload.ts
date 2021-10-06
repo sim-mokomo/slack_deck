@@ -1,7 +1,7 @@
 import { ipcRenderer, contextBridge } from "electron"
-import {AddSlackColumnRequest} from "../add-slack-column-request";
-import {AddWorkspaceIconRequest} from "../add-workspace-icon-request";
-import {ChannelDefine} from "../channel-define";
+import {AddSlackColumnRequest} from "../connection/add-slack-column-request";
+import {AddWorkspaceIconRequest} from "../connection/add-workspace-icon-request";
+import {ChannelDefine} from "../connection/channel-define";
 
 contextBridge.exposeInMainWorld("api", {
 	InitIndex: () => ipcRenderer.send(ChannelDefine.onInitializeIndexR2M),
