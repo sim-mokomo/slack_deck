@@ -8,6 +8,7 @@ import {SlackColumnModel} from "../slack/column/slack-column-model";
 import {SlackColumnView} from "../slack/column/slack-column-view";
 import {SlackColumnViewInfo} from "../slack/column/slack-column-view-info";
 import {AddWorkspaceIconRequest} from "../add-workspace-icon-request";
+import {ChannelDefine} from "../channel-define";
 const AppConfigFileName = "appconfig.json"
 
 export class IndexMainProcess {
@@ -43,7 +44,7 @@ export class IndexMainProcess {
 	}
 
 	init(): void {
-		ipcMain.on("init-index", (event) => {
+		ipcMain.on(ChannelDefine.onInitializeIndexR2M, (event) => {
 			{
 				// ワークスペースアイコン追加
 				const [appConfig, ] : [AppConfig, boolean] = new AppConfigRepository().load(AppConfigFileName)
@@ -73,7 +74,7 @@ export class IndexMainProcess {
 			}
 		})
 
-		ipcMain.on("add-column-request", (event, arg) => {
+		ipcMain.on(ChannelDefine.addSlackColumnR2M, (event, arg) => {
 			const workSpaceConfig = this.getCurrentWorkspaceConfig()
 			if(workSpaceConfig == null){
 				return
@@ -105,7 +106,7 @@ export class IndexMainProcess {
 			this.addSlackColumnReply(event, [request])
 		})
 
-		ipcMain.on("remove-column-request", (event, arg) => {
+		ipcMain.on(ChannelDefine.removeSlackColumnR2M, (event, arg) => {
 			const id = <number>arg
 			this.workspaceModel.removeColumn(id)
 
@@ -120,7 +121,7 @@ export class IndexMainProcess {
 			appConfigRepository.save(AppConfigFileName, appConfig)
 		})
 
-		ipcMain.on("on-added-column", (ipcMainEvent, url) => {
+		ipcMain.on(ChannelDefine.onAddedSlackColumnR2M, (ipcMainEvent, url) => {
 			const columnId = this.workspaceModel.getColumnNum()
 			const columnViewInfo = new SlackColumnViewInfo(
 					columnId,
@@ -136,7 +137,7 @@ export class IndexMainProcess {
 			this.onChangedSlackColumn()
 		})
 
-		ipcMain.on("update-column-position-reply", (event, xPosList: number[], yPosList: number[], widthList:number[], heightList:number[]) => {
+		ipcMain.on(ChannelDefine.updateSlackColumnPositionR2M, (event, xPosList: number[], yPosList: number[], widthList:number[], heightList:number[]) => {
 			console.log(this.workspaceModel.getColumnNum())
 			this.workspaceModel.getColumns().forEach((column, i) => {
 				column.setSize(
@@ -147,7 +148,7 @@ export class IndexMainProcess {
 			})
 		})
 
-		ipcMain.on("reload-workspace-request", (event) => {
+		ipcMain.on(ChannelDefine.reloadAppR2M, (event) => {
 			// todo: renderer側の再構築
 			const workspaceConfig = this.getCurrentWorkspaceConfig()
 			if(workspaceConfig == null){
@@ -157,7 +158,7 @@ export class IndexMainProcess {
 			this.reloadWorkspaceReplyByWorkspaceConfig(event, workspaceConfig)
 		})
 
-		ipcMain.on("on-clicked-workspace-icon-r2m", (event, arg) => {
+		ipcMain.on(ChannelDefine.onClickedWorkspaceIconR2M, (event, arg) => {
 			const workspaceId = <string>(arg)
 
 			const appConfigRepository = new AppConfigRepository()
@@ -181,13 +182,13 @@ export class IndexMainProcess {
 	}
 
 	addSlackColumnReply(event: IpcMainEvent, requests: AddSlackColumnRequest[],): void {
-		event.sender.send("add-column-reply", JSON.stringify(requests))
+		event.sender.send(ChannelDefine.addSlackColumnM2R, JSON.stringify(requests))
 	}
 	updateSlackColumnPositionRequest() : void {
-		this.rootWindow.webContents.send("update-column-position-request")
+		this.rootWindow.webContents.send(ChannelDefine.updateSlackColumnPositionM2R)
 	}
 	reloadWorkspaceReply(event: IpcMainEvent, requests : AddSlackColumnRequest[]) :void {
-		event.sender.send("reload-workspace-reply", JSON.stringify(requests))
+		event.sender.send(ChannelDefine.reloadAppM2R, JSON.stringify(requests))
 	}
 
 	getCurrentWorkspaceConfig(): WorkspaceConfig | null {
@@ -201,7 +202,7 @@ export class IndexMainProcess {
 	}
 
 	addWorkspaceIconsReply(event:IpcMainEvent, requests: AddWorkspaceIconRequest[]) : void {
-		event.sender.send("add-workspace-icon-reply", JSON.stringify(requests))
+		event.sender.send(ChannelDefine.addWorkspaceIconM2R, JSON.stringify(requests))
 	}
 
 	reloadWorkspaceReplyByWorkspaceConfig(event:IpcMainEvent, workspaceConifg:WorkspaceConfig){

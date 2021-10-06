@@ -1,11 +1,12 @@
 import { ipcRenderer, contextBridge } from "electron"
 import {AddSlackColumnRequest} from "../add-slack-column-request";
 import {AddWorkspaceIconRequest} from "../add-workspace-icon-request";
+import {ChannelDefine} from "../channel-define";
 
 contextBridge.exposeInMainWorld("api", {
-	InitIndex: () => ipcRenderer.send("init-index"),
+	InitIndex: () => ipcRenderer.send(ChannelDefine.onInitializeIndexR2M),
 	AddSlackColumnReply: (listener: (url: string, id: number) => void) => {
-		ipcRenderer.on("add-column-reply", (event, arg) => {
+		ipcRenderer.on(ChannelDefine.addSlackColumnM2R, (event, arg) => {
 			const responses: AddSlackColumnRequest[] = []
 			Object.assign(responses, JSON.parse(arg))
 
@@ -15,27 +16,27 @@ contextBridge.exposeInMainWorld("api", {
 		})
 	},
 	AddSlackColumnRequest: (url: string) => {
-		ipcRenderer.send("add-column-request", url)
+		ipcRenderer.send(ChannelDefine.addSlackColumnR2M, url)
 	},
 	RemoveSlackColumnRequest: (id: number) => {
-		ipcRenderer.send("remove-column-request", id)
+		ipcRenderer.send(ChannelDefine.removeSlackColumnR2M, id)
 	},
 	OnAddedSlackColumn: (url: string) => {
-		ipcRenderer.send("on-added-column", url)
+		ipcRenderer.send(ChannelDefine.onAddedSlackColumnR2M, url)
 	},
 	UpdateSlackColumnPositionRequest: (listener:()=>void) => {
-		ipcRenderer.on("update-column-position-request", () => {
+		ipcRenderer.on(ChannelDefine.updateSlackColumnPositionM2R, () => {
 			listener()
 		})
 	},
 	UpdateSlackColumnPositionReply: (xPosList:number[], yPosList:number[], widthList:number[], heightList:number[]) => {
-		ipcRenderer.send("update-column-position-reply", xPosList,yPosList,widthList,heightList)
+		ipcRenderer.send(ChannelDefine.updateSlackColumnPositionR2M, xPosList,yPosList,widthList,heightList)
 	},
 	ReloadWorkspaceRequest: () => {
-		ipcRenderer.send("reload-workspace-request");
+		ipcRenderer.send(ChannelDefine.reloadAppR2M);
 	},
 	ReloadWorkspaceReply: (receiver: (urlList: string[], idList: number[]) => void) => {
-		ipcRenderer.on("reload-workspace-reply", (event, arg) => {
+		ipcRenderer.on(ChannelDefine.reloadAppM2R, (event, arg) => {
 			const responses: AddSlackColumnRequest[] = []
 			Object.assign(responses, JSON.parse(arg))
 
@@ -45,7 +46,7 @@ contextBridge.exposeInMainWorld("api", {
 		})
 	},
 	AddWorkspaceIconRequestM2R: (receiver: (workspaceIdList:string[]) => void) => {
-		ipcRenderer.on("add-workspace-icon-reply", (event, arg) => {
+		ipcRenderer.on(ChannelDefine.addWorkspaceIconM2R, (event, arg) => {
 			const responses : AddWorkspaceIconRequest[] = []
 			Object.assign(responses, JSON.parse(arg))
 
@@ -54,6 +55,6 @@ contextBridge.exposeInMainWorld("api", {
 		})
 	},
 	OnClickedWorkspaceIconR2M: (workspaceId:string) => {
-		ipcRenderer.send("on-clicked-workspace-icon-r2m", workspaceId)
+		ipcRenderer.send(ChannelDefine.onClickedWorkspaceIconR2M, workspaceId)
 	}
 })
