@@ -1,9 +1,9 @@
-export class AddSlackColumnRequest {
-    url: string
-    id: number
+import {SlackColumnHtmlViewInfo} from "../slack/column/slack-column-html-view-info";
 
-    constructor(url: string, id: number) {
-        this.url = url
-        this.id = id
+export class AddSlackColumnRequest {
+    columnViewInfo = new SlackColumnHtmlViewInfo()
+
+    constructor(init?: Partial<AddSlackColumnRequest>) {
+        Object.assign(this, init)
     }
 }

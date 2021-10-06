@@ -9,8 +9,8 @@ contextBridge.exposeInMainWorld("api", {
 		ipcRenderer.on(ChannelDefine.addSlackColumnM2R, (event, arg) => {
 			const responses: AddSlackColumnRequest[] = []
 			Object.assign(responses, JSON.parse(arg))
-			const urlList = responses.map(x => x.url)
-			const idList = responses.map(x => x.id)
+			const urlList = responses.map(x => x.columnViewInfo.url)
+			const idList = responses.map(x => x.columnViewInfo.id)
 			listener(urlList, idList)
 		})
 	},
@@ -39,8 +39,8 @@ contextBridge.exposeInMainWorld("api", {
 			const responses: AddSlackColumnRequest[] = []
 			Object.assign(responses, JSON.parse(arg))
 
-			const urlList = responses.map(x => x.url)
-			const idList = responses.map(x => x.id)
+			const urlList = responses.map(x => x.columnViewInfo.url)
+			const idList = responses.map(x => x.columnViewInfo.id)
 			receiver(urlList, idList)
 		})
 	},

@@ -9,6 +9,7 @@ import {SlackColumnBrowserView} from "../slack/column/slack-column-browser-view"
 import {SlackColumnBrowserViewInfo} from "../slack/column/slack-column-browser-view-info";
 import {AddWorkspaceIconRequest} from "../connection/add-workspace-icon-request";
 import {ChannelDefine} from "../connection/channel-define";
+import {SlackColumnHtmlViewInfo} from "../slack/column/slack-column-html-view-info";
 const AppConfigFileName = "appconfig.json"
 
 export class IndexMainProcess {
@@ -63,12 +64,17 @@ export class IndexMainProcess {
 				}
 
 				const requests = workspaceConfig.columns.map(
-					x =>
-						new AddSlackColumnRequest(
-							SlackService.getWebViewURL(workspaceConfig.workspace_id, x.channel_id, x.thread_ts),
-							x.id
-						),
+					x => new AddSlackColumnRequest({
+							columnViewInfo: {
+								url: SlackService.getWebViewURL(workspaceConfig.workspace_id, x.channel_id, x.thread_ts),
+								id: x.id
+							}
+						}
+					)
 				)
+
+				console.log(requests)
+				console.log(requests[0])
 				this.addSlackColumnReply(event, requests)
 			}
 		})
@@ -82,14 +88,12 @@ export class IndexMainProcess {
 			const url: string = <string>arg
 			const [channelId, threadTs] = SlackService.parseUrl(url)
 			const columnId = workSpaceConfig.columns.length
-			const request: AddSlackColumnRequest = {
-				url: SlackService.getWebViewURL(
-					workSpaceConfig.workspace_id,
-					channelId,
-					threadTs,
-				),
-				id: columnId,
-			}
+			const request = new AddSlackColumnRequest({
+								columnViewInfo:{
+									url: SlackService.getWebViewURL(workSpaceConfig.workspace_id,  channelId,  threadTs),
+									id: columnId
+								}
+							})
 
 			const [appConfig,] : [AppConfig, boolean] = new AppConfigRepository().load(AppConfigFileName)
 			appConfig.addWorkspaceColumnConfig(
@@ -208,10 +212,12 @@ export class IndexMainProcess {
 		// note: ModelとBrowserViewの解放
 		this.workspaceModel.removeAll()
 		const addSlackColumnRequests = workspaceConifg.columns.map((x) => {
-			return new AddSlackColumnRequest(
-				SlackService.getWebViewURL(workspaceConifg.workspace_id, x.channel_id, x.thread_ts),
-				x.id
-			)
+			return new AddSlackColumnRequest({
+				columnViewInfo: {
+					id: x.id,
+					url: SlackService.getWebViewURL(workspaceConifg.workspace_id, x.channel_id, x.thread_ts),
+				}
+			})
 		})
 		this.reloadWorkspaceReply(event, addSlackColumnRequests)
 	}
