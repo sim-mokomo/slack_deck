@@ -80,12 +80,12 @@ window.onload = () => {
 			if (addColumnInputDOM == null) {
 				return
 			}
-			window.api.AddSlackColumnRequest(addColumnInputDOM.value)
+			window.api.addSlackColumnR2M(addColumnInputDOM.value)
 			addColumnInputDOM.value = ""
 		})
 	}
 
-	window.api.AddSlackColumnReply((urlList: string[], idList: number[]) => {
+	window.api.addSlackColumnM2R((urlList: string[], idList: number[]) => {
 		for (let i = 0; i < idList.length; i++) {
 			const url = urlList[i]
 			const id = idList[i]
@@ -93,7 +93,7 @@ window.onload = () => {
 		}
 	})
 
-	window.api.UpdateSlackColumnPositionRequest(()=>{
+	window.api.updateSlackColumnPositionM2R(()=>{
 		updateSlackColumnPositionReply()
 	})
 
@@ -101,12 +101,12 @@ window.onload = () => {
 	const reloadWorkspaceButtonDOM = document.getElementById("reload-workspace-button")
 	if(reloadWorkspaceButtonDOM != null){
 		reloadWorkspaceButtonDOM.addEventListener("click", () => {
-			window.api.ReloadWorkspaceRequest()
+			window.api.reloadAppR2M()
 			// todo: リロードリプライをもらって表示を更新する
 		})
 	}
 
-	window.api.ReloadWorkspaceReply((urlList:string[], idList:number[]) => {
+	window.api.reloadAppM2R((urlList:string[], idList:number[]) => {
 		const webViewContainerDOM = document.getElementsByClassName("webview-container")[0]
 		while(webViewContainerDOM.firstChild){
 			webViewContainerDOM.removeChild(webViewContainerDOM.firstChild)
@@ -121,19 +121,19 @@ window.onload = () => {
 	})
 
 	// note: workspace切り替えアイコン
-	window.api.AddWorkspaceIconRequestM2R(workspaceIdList => {
+	window.api.addWorkspaceIconM2R(workspaceIdList => {
 		const workspaceIconContainer = document.getElementsByClassName("workspace-icon-container")[0]
 		for (const workspaceId of workspaceIdList) {
 			const workspaceIconButtonDOM = document.createElement("button")
 			workspaceIconButtonDOM.innerText = workspaceId
 			workspaceIconButtonDOM.addEventListener("click", () => {
-				window.api.OnClickedWorkspaceIconR2M(workspaceId)
+				window.api.onClickedWorkspaceIconR2M(workspaceId)
 			})
 			workspaceIconContainer.appendChild(workspaceIconButtonDOM)
 		}
 	})
 
-	window.api.InitIndex()
+	window.api.onInitializeIndexR2M()
 }
 
 function AddSlackColumn(url:string , id:number){
@@ -141,7 +141,7 @@ function AddSlackColumn(url:string , id:number){
 	const column = new SlackColumnView(id, (self) => {
 		const column = slackWorkspaceView.getColumn(self.getId())
 		if(column != null){
-			window.api.RemoveSlackColumnRequest(self.getId())
+			window.api.removeSlackColumnR2M(self.getId())
 			slackWorkspaceView.removeColumn(self.getId())
 			webviewContainerDOM.removeChild(self.getDOM())
 			updateSlackColumnPositionReply()
@@ -151,12 +151,12 @@ function AddSlackColumn(url:string , id:number){
 	slackWorkspaceView.addColumn(column)
 	webviewContainerDOM.appendChild(column.getDOM())
 
-	window.api.OnAddedSlackColumn(url)
+	window.api.onAddedSlackColumnR2M(url)
 }
 
 function updateSlackColumnPositionReply() {
 	const [xPosList,yPosList,widthList,heightList] = getSlackColumnViewDomRects()
-	window.api.UpdateSlackColumnPositionReply(
+	window.api.updateSlackColumnPositionR2M(
 		xPosList,
 		yPosList,
 		widthList,
