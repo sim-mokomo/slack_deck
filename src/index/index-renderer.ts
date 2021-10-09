@@ -1,16 +1,56 @@
-class SlackWorkspaceViewModel
+// todo: バンドラツールを使用してファイル分けを行えるようにする
+class SlackWorkspaceHtmlView
 {
-	private columnViews : SlackColumnView[] = []
-	private slackColumnContainerDOM : Element | null = null
-	onLoadWindow(document:Document){
+	private columnViews : SlackColumnHtmlView[] = []
+	private slackColumnContainerDOM : Element
+	private readonly addColumnButtonDOM : HTMLButtonElement
+	private readonly addColumnButtonInputDOM : HTMLInputElement
+	private readonly reloadButtonDOM : HTMLButtonElement
+	private readonly workspaceIconContainer : Element
+	private readonly onClickedAddColumnButton : (url:string) => void
+	private readonly onClickedReloadButton : () => void
+	private readonly onClickedWorkspaceIcon : (workspaceId:string) => void
+
+	constructor(
+		document:Document,
+		onClickedAddColumnButton : (url:string) => void,
+		onClickedReloadButton : () => void,
+		onClickedWorkspaceIcon : (workspaceId:string) => void) {
 		this.slackColumnContainerDOM = document.getElementsByClassName("webview-container")[0]
+		this.workspaceIconContainer = document.getElementsByClassName("workspace-icon-container")[0]
+		this.onClickedAddColumnButton = onClickedAddColumnButton
+		this.onClickedReloadButton = onClickedReloadButton
+		this.onClickedWorkspaceIcon = onClickedWorkspaceIcon
+
+		// note: カラム追加
+		this.addColumnButtonDOM = (<HTMLButtonElement>document.getElementById("add-column-confirm-button"))
+		this.addColumnButtonInputDOM = <HTMLInputElement>(document.getElementById("add-column-input"))
+		this.addColumnButtonDOM.addEventListener("click", () => {
+			this.onClickedAddColumnButton(this.addColumnButtonInputDOM.value)
+			this.addColumnButtonInputDOM.value = ""
+		})
+
+		// note: 表示リロード
+		this.reloadButtonDOM = (<HTMLButtonElement>document.getElementById("reload-workspace-button"))
+		this.reloadButtonDOM.addEventListener("click", () => {
+			this.onClickedReloadButton()
+		})
+	}
+
+	addWorkspaceIcon(workspaceId: string) {
+		const workspaceIconButtonDOM = document.createElement("button")
+		workspaceIconButtonDOM.innerText = workspaceId
+		workspaceIconButtonDOM.addEventListener("click", () => {
+			this.onClickedWorkspaceIcon(workspaceId)
+		})
+		this.workspaceIconContainer.appendChild(workspaceIconButtonDOM)
 	}
 
 	getColumns() { return this.columnViews }
 
-	addColumn(columnModel: SlackColumnView){
+	addColumn(columnModel: SlackColumnHtmlView){
 		this.columnViews.push(columnModel)
-		this.slackColumnContainerDOM?.appendChild(columnModel.getColumnContainerDOM())
+		this.slackColumnContainerDOM.appendChild(columnModel.getColumnContainerDOM())
 	}
 
 	getColumn(id:number){
@@ -23,25 +63,25 @@ class SlackWorkspaceViewModel
 			return
 		}
 		this.columnViews = this.columnViews.filter(x => x.getId() != id)
-		this.slackColumnContainerDOM?.removeChild(removeSlackColumn.getColumnContainerDOM())
+		this.slackColumnContainerDOM.removeChild(removeSlackColumn.getColumnContainerDOM())
 	}
 
 	removeAll(){
 		this.columnViews = []
-		while(this.slackColumnContainerDOM?.firstChild){
-			this.slackColumnContainerDOM?.removeChild(this.slackColumnContainerDOM?.firstChild)
+		while(this.slackColumnContainerDOM.firstChild){
+			this.slackColumnContainerDOM.removeChild(this.slackColumnContainerDOM.firstChild)
 		}
 	}
 }
 
-class SlackColumnView
+class SlackColumnHtmlView
 {
 	private readonly webviewItemDOM : HTMLDivElement
 	private readonly headerDOM : HTMLDivElement
 	private readonly columnBodyDOM : HTMLDivElement
 	private readonly id : number
 
-	constructor(id:number, closeAction: (self:SlackColumnView) => void) {
+	constructor(id:number, closeAction: (self:SlackColumnHtmlView) => void) {
 		this.id = id
 		this.webviewItemDOM = document.createElement("div")
 		this.webviewItemDOM.setAttribute("class", "webview-item")
@@ -75,47 +115,34 @@ class SlackColumnView
 	isHomeColumn() : boolean { return this.id == 0}
 }
 
-const slackWorkspaceView = new SlackWorkspaceViewModel()
-
 window.onload = () => {
+	const slackWorkspaceView
+		= new SlackWorkspaceHtmlView(document,
+			url => {
+				window.api.addSlackColumnR2M(url)
+			},
+		() => {
+			window.api.reloadAppR2M()
+		},
+		workspaceId => {
+			window.api.onClickedWorkspaceIconR2M(workspaceId)
+		})
 	window.addEventListener("scroll", ()=>{
 		updateSlackColumnPositionReply()
 	})
-
-	// note: カラム追加
-	const addColumnConfirmButtonDOM = document.getElementById(
-		"add-column-confirm-button",
-	)
-	if (addColumnConfirmButtonDOM != null) {
-		addColumnConfirmButtonDOM.addEventListener("click", () => {
-			const addColumnInputDOM: HTMLInputElement = <HTMLInputElement>(
-				document.getElementById("add-column-input")
-			)
-			if (addColumnInputDOM == null) {
-				return
-			}
-			window.api.addSlackColumnR2M(addColumnInputDOM.value)
-			addColumnInputDOM.value = ""
-		})
-	}
 
 	window.api.addSlackColumnM2R(requestList  => {
 		requestList.forEach(x => {
 			AddSlackColumn(x.columnViewInfo.url, x.columnViewInfo.id)
 		})
 	})
+	window.api.addWorkspaceIconM2R(workspaceIdList => {
+		workspaceIdList.forEach(id => slackWorkspaceView.addWorkspaceIcon(id))
+	})
 
 	window.api.updateSlackColumnPositionM2R(()=>{
 		updateSlackColumnPositionReply()
 	})
-
-	// note: 表示リロード
-	const reloadWorkspaceButtonDOM = document.getElementById("reload-workspace-button")
-	if(reloadWorkspaceButtonDOM != null){
-		reloadWorkspaceButtonDOM.addEventListener("click", () => {
-			window.api.reloadAppR2M()
-		})
-	}
 
 	window.api.reloadAppM2R(request => {
 		slackWorkspaceView.removeAll()
@@ -127,50 +154,36 @@ window.onload = () => {
 		updateSlackColumnPositionReply()
 	})
 
-	// note: workspace切り替えアイコン
-	window.api.addWorkspaceIconM2R(workspaceIdList => {
-		const workspaceIconContainer = document.getElementsByClassName("workspace-icon-container")[0]
-		for (const workspaceId of workspaceIdList) {
-			const workspaceIconButtonDOM = document.createElement("button")
-			workspaceIconButtonDOM.innerText = workspaceId
-			workspaceIconButtonDOM.addEventListener("click", () => {
-				window.api.onClickedWorkspaceIconR2M(workspaceId)
-			})
-			workspaceIconContainer.appendChild(workspaceIconButtonDOM)
-		}
-	})
-
-	slackWorkspaceView.onLoadWindow(document)
 	window.api.onInitializeIndexR2M()
-}
 
-function AddSlackColumn(url:string , id:number){
-	const column = new SlackColumnView(id, (self) => {
-		const column = slackWorkspaceView.getColumn(self.getId())
-		if(column != null){
-			window.api.removeSlackColumnR2M(self.getId())
-			slackWorkspaceView.removeColumn(self.getId())
-			updateSlackColumnPositionReply()
-		}
-	})
+	function AddSlackColumn(url:string , id:number){
+		const column = new SlackColumnHtmlView(id, (self) => {
+			const column = slackWorkspaceView.getColumn(self.getId())
+			if(column != null){
+				window.api.removeSlackColumnR2M(self.getId())
+				slackWorkspaceView.removeColumn(self.getId())
+				updateSlackColumnPositionReply()
+			}
+		})
 
-	slackWorkspaceView.addColumn(column)
-	window.api.onAddedSlackColumnR2M(url)
-}
+		slackWorkspaceView.addColumn(column)
+		window.api.onAddedSlackColumnR2M(url)
+	}
 
-function updateSlackColumnPositionReply() {
-	window.api.updateSlackColumnPositionR2M(getSlackColumnViewDomRects())
-}
+	function updateSlackColumnPositionReply() {
+		window.api.updateSlackColumnPositionR2M(getSlackColumnViewDomRects())
+	}
 
-function getSlackColumnViewDomRects() : Electron.Rectangle[] {
-	const columnRectangleList = slackWorkspaceView.getColumns().map(x => {
-		const rect = x.getColumnBodyDOM().getBoundingClientRect()
-		return {
-			x: Math.round(rect.x),
-			y: Math.round(rect.y),
-			width: Math.round(rect.width),
-			height: Math.round(rect.height)
-		}
-	})
-	return columnRectangleList
+	function getSlackColumnViewDomRects() : Electron.Rectangle[] {
+		const columnRectangleList = slackWorkspaceView.getColumns().map(x => {
+			const rect = x.getColumnBodyDOM().getBoundingClientRect()
+			return {
+				x: Math.round(rect.x),
+				y: Math.round(rect.y),
+				width: Math.round(rect.width),
+				height: Math.round(rect.height)
+			}
+		})
+		return columnRectangleList
+	}
 }
