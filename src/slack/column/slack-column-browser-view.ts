@@ -34,15 +34,8 @@ export class SlackColumnBrowserView
         this.parentWindow.addBrowserView(this.browserView)
     }
 
-    setSize(x:number, y:number, width:number, height: number){
-        this.browserView.setBounds(
-            {
-                x: Math.round(x),
-                y: Math.round(y),
-                width: Math.round(width),
-                height: Math.round(height)
-            }
-        )
+    setSize(rectangle:Electron.Rectangle){
+        this.browserView.setBounds(rectangle)
     }
 
     isHomeColumn(){

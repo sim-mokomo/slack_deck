@@ -85,12 +85,10 @@ window.onload = () => {
 		})
 	}
 
-	window.api.addSlackColumnM2R((urlList: string[], idList: number[]) => {
-		for (let i = 0; i < idList.length; i++) {
-			const url = urlList[i]
-			const id = idList[i]
-			AddSlackColumn(url, id)
-		}
+	window.api.addSlackColumnM2R(requestList  => {
+		requestList.forEach(x => {
+			AddSlackColumn(x.columnViewInfo.url, x.columnViewInfo.id)
+		})
 	})
 
 	window.api.updateSlackColumnPositionM2R(()=>{
@@ -106,16 +104,16 @@ window.onload = () => {
 		})
 	}
 
-	window.api.reloadAppM2R((urlList:string[], idList:number[]) => {
+	window.api.reloadAppM2R(request => {
 		const webViewContainerDOM = document.getElementsByClassName("webview-container")[0]
 		while(webViewContainerDOM.firstChild){
 			webViewContainerDOM.removeChild(webViewContainerDOM.firstChild)
 		}
 		slackWorkspaceView.removeAll()
 
-		for (let i = 0; i < idList.length; i++) {
-			AddSlackColumn(urlList[i], idList[i])
-		}
+		request.columnViewInfoList.forEach(x => {
+			AddSlackColumn(x.url, x.id)
+		})
 
 		updateSlackColumnPositionReply()
 	})
@@ -156,11 +154,16 @@ function AddSlackColumn(url:string , id:number){
 
 function updateSlackColumnPositionReply() {
 	const [xPosList,yPosList,widthList,heightList] = getSlackColumnViewDomRects()
-	window.api.updateSlackColumnPositionR2M(
-		xPosList,
-		yPosList,
-		widthList,
-		heightList)
+	const rectangleList : Electron.Rectangle[] = []
+	for(let i = 0; i < xPosList.length; i++){
+		rectangleList.push({
+			x: Math.round(xPosList[i]) ,
+			y: Math.round(yPosList[i]) ,
+			width: Math.round(widthList[i]) ,
+			height: Math.round(heightList[i])
+		})
+	}
+	window.api.updateSlackColumnPositionR2M(rectangleList)
 }
 
 function getSlackColumnViewDomRects() : [number[], number[], number[], number[]]{

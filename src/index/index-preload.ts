@@ -2,16 +2,15 @@ import { ipcRenderer, contextBridge } from "electron"
 import {AddSlackColumnRequest} from "../connection/add-slack-column-request";
 import {AddWorkspaceIconRequest} from "../connection/add-workspace-icon-request";
 import {ChannelDefine} from "../connection/channel-define";
+import {ReloadAppRequest} from "../connection/reload-app-request";
 
 contextBridge.exposeInMainWorld("api", {
 	onInitializeIndexR2M: () => ipcRenderer.send(ChannelDefine.onInitializeIndexR2M),
-	addSlackColumnM2R: (listener: (urlList: string[], idList: number[]) => void) => {
+	addSlackColumnM2R: (listener: (requestList : AddSlackColumnRequest[]) => void) => {
 		ipcRenderer.on(ChannelDefine.addSlackColumnM2R, (event, arg) => {
 			const responses: AddSlackColumnRequest[] = []
 			Object.assign(responses, JSON.parse(arg))
-			const urlList = responses.map(x => x.columnViewInfo.url)
-			const idList = responses.map(x => x.columnViewInfo.id)
-			listener(urlList, idList)
+			listener(responses)
 		})
 	},
 	addSlackColumnR2M: (url: string) => {
@@ -28,20 +27,16 @@ contextBridge.exposeInMainWorld("api", {
 			listener()
 		})
 	},
-	updateSlackColumnPositionR2M: (xPosList:number[], yPosList:number[], widthList:number[], heightList:number[]) => {
-		ipcRenderer.send(ChannelDefine.updateSlackColumnPositionR2M, xPosList,yPosList,widthList,heightList)
+	updateSlackColumnPositionR2M: (rectangleList: Electron.Rectangle[]) => {
+		ipcRenderer.send(ChannelDefine.updateSlackColumnPositionR2M, rectangleList)
 	},
 	reloadAppR2M: () => {
 		ipcRenderer.send(ChannelDefine.reloadAppR2M);
 	},
-	reloadAppM2R: (receiver: (urlList: string[], idList: number[]) => void) => {
+	reloadAppM2R: (receiver: (request: ReloadAppRequest) => void) => {
 		ipcRenderer.on(ChannelDefine.reloadAppM2R, (event, arg) => {
-			const responses: AddSlackColumnRequest[] = []
-			Object.assign(responses, JSON.parse(arg))
-
-			const urlList = responses.map(x => x.columnViewInfo.url)
-			const idList = responses.map(x => x.columnViewInfo.id)
-			receiver(urlList, idList)
+			const request: ReloadAppRequest = new ReloadAppRequest(JSON.parse(arg))
+			receiver(request)
 		})
 	},
 	addWorkspaceIconM2R: (receiver: (workspaceIdList:string[]) => void) => {
