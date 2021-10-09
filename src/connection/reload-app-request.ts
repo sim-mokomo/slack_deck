@@ -1,4 +1,5 @@
 import {SlackColumnHtmlViewInfo} from "../slack/column/slack-column-html-view-info";
+import {WorkspaceIconHtmlViewInfo} from "../slack/workspace/workspace-icon-html-view-info";
 
 export class ReloadAppRequest {
     columnViewInfoList : SlackColumnHtmlViewInfo[] = []

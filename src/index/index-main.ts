@@ -11,6 +11,7 @@ import {AddWorkspaceIconRequest} from "../connection/add-workspace-icon-request"
 import {ChannelDefine} from "../connection/channel-define";
 import {SlackColumnHtmlViewInfo} from "../slack/column/slack-column-html-view-info";
 import {ReloadAppRequest} from "../connection/reload-app-request";
+import {WorkspaceIconHtmlViewInfo} from "../slack/workspace/workspace-icon-html-view-info";
 const AppConfigFileName = "appconfig.json"
 
 export class IndexMainProcess {
@@ -198,13 +199,20 @@ export class IndexMainProcess {
 			return
 		}
 
+		const workspaceIconHtmlViewInfos : WorkspaceIconHtmlViewInfo[] =
+			appConfig.workspaces.map(x =>  new WorkspaceIconHtmlViewInfo({
+				workspaceId: x.workspace_id,
+				// todo: ワークスペース切り替えボタン、アイコン表示できるように
+				iconUrl: ""
+			}))
 		const request = new ReloadAppRequest({
 			columnViewInfoList: workspaceConfig.columns.map(x => {
 				return new SlackColumnHtmlViewInfo({
 					id: x.id,
 					url: SlackService.getWebViewURL(workspaceConfig.workspace_id, x.channel_id, x.thread_ts)
 				})
-			})
+			}),
+			workspaceIconInfoList: workspaceIconHtmlViewInfos
 		})
 		this.reloadAppM2R(event, request)
 	}

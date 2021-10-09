@@ -1,4 +1,4 @@
-class WorkspaceIconHtmlViewInfo{
+export class WorkspaceIconHtmlViewInfo{
     workspaceId  = ""
     iconUrl = ""
 

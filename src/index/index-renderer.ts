@@ -71,6 +71,9 @@ class SlackWorkspaceHtmlView
 		while(this.slackColumnContainerDOM.firstChild){
 			this.slackColumnContainerDOM.removeChild(this.slackColumnContainerDOM.firstChild)
 		}
+		while(this.workspaceIconContainer.firstChild){
+			this.workspaceIconContainer.removeChild(this.workspaceIconContainer.firstChild)
+		}
 	}
 }
 
@@ -149,6 +152,10 @@ window.onload = () => {
 
 		request.columnViewInfoList.forEach(x => {
 			AddSlackColumn(x.url, x.id)
+		})
+
+		request.workspaceIconInfoList.forEach(x => {
+			slackWorkspaceView.addWorkspaceIcon(x.workspaceId)
 		})
 
 		updateSlackColumnPositionReply()
