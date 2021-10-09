@@ -49,12 +49,15 @@ export class IndexMainProcess {
 		ipcMain.on(ChannelDefine.onInitializeIndexR2M, (event) => {
 			{
 				// ワークスペースアイコン追加
-				const appConfig = new AppConfigRepository().load(AppConfigFileName)
-				const requests = appConfig.getWorkspaceConfigs().map(x => {
-					return new AddWorkspaceIconRequest(
-						x.workspace_id
-					)
-				})
+				const requests =
+					new AppConfigRepository()
+						.load(AppConfigFileName)
+						.getWorkspaceConfigs()
+						.map(x => {
+							return new AddWorkspaceIconRequest(
+								x.workspace_id
+							)
+						})
 				this.addWorkspaceIconsReply(event, requests)
 			}
 
@@ -88,14 +91,8 @@ export class IndexMainProcess {
 			const url: string = <string>arg
 			const [channelId, threadTs] = SlackService.parseUrl(url)
 			const columnId = workSpaceConfig.columns.length
-			const request = new AddSlackColumnRequest({
-								columnViewInfo:{
-									url: SlackService.getWebViewURL(workSpaceConfig.workspace_id,  channelId,  threadTs),
-									id: columnId
-								}
-							})
-
-			const appConfig = new AppConfigRepository().load(AppConfigFileName)
+			const appConfigRepository = new AppConfigRepository()
+			const appConfig = appConfigRepository.load(AppConfigFileName)
 			appConfig.addWorkspaceColumnConfig(
 				workSpaceConfig.workspace_id,
 				new WorkspaceColumnConfig(
@@ -104,8 +101,14 @@ export class IndexMainProcess {
 					threadTs,
 				),
 			)
+			appConfigRepository.save(AppConfigFileName, appConfig)
 
-			new AppConfigRepository().save(AppConfigFileName, appConfig)
+			const request = new AddSlackColumnRequest({
+								columnViewInfo:{
+									url: SlackService.getWebViewURL(workSpaceConfig.workspace_id,  channelId,  threadTs),
+									id: columnId
+								}
+							})
 			this.addSlackColumnReply(event, [request])
 		})
 
