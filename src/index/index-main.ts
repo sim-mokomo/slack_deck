@@ -25,8 +25,7 @@ export class IndexMainProcess {
 			appConfigRepository.save(AppConfigFileName,  AppConfig.default)
 		}
 
-		const appConfig = appConfigRepository.load(AppConfigFileName)
-		this.currentWorkspaceId = appConfig.current_workspace_id
+		this.currentWorkspaceId = appConfigRepository.load(AppConfigFileName).current_workspace_id
 
 		this.rootWindow = rootWindow
 		// todo: ワークスペースを対象にしたカラムのリロードを行えるように
@@ -47,11 +46,11 @@ export class IndexMainProcess {
 
 	init(): void {
 		ipcMain.on(ChannelDefine.onInitializeIndexR2M, (event) => {
+			const appConfig = new AppConfigRepository().load(AppConfigFileName)
 			{
 				// ワークスペースアイコン追加
 				const requests =
-					new AppConfigRepository()
-						.load(AppConfigFileName)
+						appConfig
 						.getWorkspaceConfigs()
 						.map(x => {
 							return new AddWorkspaceIconRequest(
@@ -63,7 +62,7 @@ export class IndexMainProcess {
 
 			{
 				// カラム表示
-				const workspaceConfig = this.getCurrentWorkspaceConfig()
+				const workspaceConfig = appConfig.findWorkspaceConfigById(this.currentWorkspaceId)
 				if(workspaceConfig == null){
 					return
 				}
@@ -83,7 +82,9 @@ export class IndexMainProcess {
 		})
 
 		ipcMain.on(ChannelDefine.addSlackColumnR2M, (event, arg) => {
-			const workSpaceConfig = this.getCurrentWorkspaceConfig()
+			const appConfigRepository = new AppConfigRepository()
+			const appConfig = appConfigRepository.load(AppConfigFileName)
+			const workSpaceConfig = appConfig.findWorkspaceConfigById(this.currentWorkspaceId)
 			if(workSpaceConfig == null){
 				return
 			}
@@ -91,8 +92,6 @@ export class IndexMainProcess {
 			const url: string = <string>arg
 			const [channelId, threadTs] = SlackService.parseUrl(url)
 			const columnId = workSpaceConfig.columns.length
-			const appConfigRepository = new AppConfigRepository()
-			const appConfig = appConfigRepository.load(AppConfigFileName)
 			appConfig.addWorkspaceColumnConfig(
 				workSpaceConfig.workspace_id,
 				new WorkspaceColumnConfig(
@@ -118,7 +117,7 @@ export class IndexMainProcess {
 
 			const appConfigRepository = new AppConfigRepository()
 			const appConfig = appConfigRepository.load(AppConfigFileName)
-			const workspaceConfig = this.getCurrentWorkspaceConfig()
+			const workspaceConfig = appConfig.findWorkspaceConfigById(this.currentWorkspaceId)
 			if(workspaceConfig == null){
 				return
 			}
@@ -150,19 +149,17 @@ export class IndexMainProcess {
 		})
 
 		ipcMain.on(ChannelDefine.reloadAppR2M, (event) => {
-			const appConfig = new AppConfigRepository().load(AppConfigFileName)
-			this.reloadAppByAppConfig(event, appConfig)
+			this.reloadAppByAppConfig(event, new AppConfigRepository().load(AppConfigFileName))
 		})
 
 		ipcMain.on(ChannelDefine.onClickedWorkspaceIconR2M, (event, arg) => {
 			const workspaceId = <string>(arg)
-			const appConfigRepository = new AppConfigRepository()
-			const appConfig = appConfigRepository.load(AppConfigFileName)
+			const appConfig = new AppConfigRepository().load(AppConfigFileName)
 			const workspaceConfig = appConfig.findWorkspaceConfigById(workspaceId)
 			if(workspaceConfig != null){
 				this.currentWorkspaceId = workspaceId
 				appConfig.current_workspace_id = this.currentWorkspaceId
-				appConfigRepository.save(AppConfigFileName, appConfig)
+				new AppConfigRepository().save(AppConfigFileName, appConfig)
 				this.reloadAppByAppConfig(event , appConfig)
 			}
 		})
@@ -186,14 +183,6 @@ export class IndexMainProcess {
 		event.sender.send(ChannelDefine.reloadAppM2R, JSON.stringify(request))
 	}
 
-	getCurrentWorkspaceConfig(): WorkspaceConfig | null {
-		const workspaceConfig =
-			new AppConfigRepository()
-				.load(AppConfigFileName)
-				.findWorkspaceConfigById(this.currentWorkspaceId)
-		return workspaceConfig
-	}
-
 	addWorkspaceIconsReply(event:IpcMainEvent, requests: AddWorkspaceIconRequest[]) : void {
 		event.sender.send(ChannelDefine.addWorkspaceIconM2R, JSON.stringify(requests))
 	}
@@ -201,7 +190,10 @@ export class IndexMainProcess {
 	reloadAppByAppConfig(event:IpcMainEvent, appConfig:AppConfig){
 		// note: ModelとBrowserViewの解放
 		this.workspaceModel.removeAll()
-		const workspaceConfig = this.getCurrentWorkspaceConfig()
+		const workspaceConfig =
+			new AppConfigRepository()
+				.load(AppConfigFileName)
+				.findWorkspaceConfigById(this.currentWorkspaceId)
 		if(workspaceConfig == null){
 			return
 		}
