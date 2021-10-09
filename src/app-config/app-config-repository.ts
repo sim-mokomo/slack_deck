@@ -2,14 +2,18 @@ import {AppConfig} from "./app-config";
 import * as fs from "fs";
 
 export class AppConfigRepository {
-    load(fileName:string) : [AppConfig, boolean] {
-        if(!fs.existsSync(fileName)){
-            return [AppConfig.default, false]
+    exists(filename:string) : boolean {
+        return fs.existsSync(filename)
+    }
+
+    load(fileName:string) : AppConfig {
+        if(!this.exists(fileName)){
+            return AppConfig.default
         }
 
         const appConfig = new AppConfig()
         Object.assign(appConfig, JSON.parse(fs.readFileSync(fileName, "utf-8")))
-        return [appConfig, true]
+        return appConfig
     }
 
     save(fileName:string, appConfig:AppConfig) : AppConfig {

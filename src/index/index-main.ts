@@ -20,12 +20,13 @@ export class IndexMainProcess {
 	currentWorkspaceId  = ""
 
 	constructor(rootWindow:BrowserWindow) {
-		const [appConfig, success] = new AppConfigRepository().load(AppConfigFileName)
-		if(!success){
-			new AppConfigRepository().save(AppConfigFileName,  AppConfig.default)
-		}else{
-			this.currentWorkspaceId = appConfig.current_workspace_id
+		const appConfigRepository = new AppConfigRepository()
+		if(!appConfigRepository.exists(AppConfigFileName)){
+			appConfigRepository.save(AppConfigFileName,  AppConfig.default)
 		}
+
+		const appConfig = appConfigRepository.load(AppConfigFileName)
+		this.currentWorkspaceId = appConfig.current_workspace_id
 
 		this.rootWindow = rootWindow
 		// todo: ワークスペースを対象にしたカラムのリロードを行えるように
@@ -48,7 +49,7 @@ export class IndexMainProcess {
 		ipcMain.on(ChannelDefine.onInitializeIndexR2M, (event) => {
 			{
 				// ワークスペースアイコン追加
-				const [appConfig, ] : [AppConfig, boolean] = new AppConfigRepository().load(AppConfigFileName)
+				const appConfig = new AppConfigRepository().load(AppConfigFileName)
 				const requests = appConfig.getWorkspaceConfigs().map(x => {
 					return new AddWorkspaceIconRequest(
 						x.workspace_id
@@ -94,7 +95,7 @@ export class IndexMainProcess {
 								}
 							})
 
-			const [appConfig,] : [AppConfig, boolean] = new AppConfigRepository().load(AppConfigFileName)
+			const appConfig = new AppConfigRepository().load(AppConfigFileName)
 			appConfig.addWorkspaceColumnConfig(
 				workSpaceConfig.workspace_id,
 				new WorkspaceColumnConfig(
@@ -113,7 +114,7 @@ export class IndexMainProcess {
 			this.workspaceModel.removeColumn(id)
 
 			const appConfigRepository = new AppConfigRepository()
-			const [appConfig,] : [AppConfig, boolean] = appConfigRepository.load(AppConfigFileName)
+			const appConfig = appConfigRepository.load(AppConfigFileName)
 			const workspaceConfig = this.getCurrentWorkspaceConfig()
 			if(workspaceConfig == null){
 				return
@@ -146,15 +147,14 @@ export class IndexMainProcess {
 		})
 
 		ipcMain.on(ChannelDefine.reloadAppR2M, (event) => {
-			const [appConfig,] : [AppConfig, boolean] = new AppConfigRepository().load(AppConfigFileName)
+			const appConfig = new AppConfigRepository().load(AppConfigFileName)
 			this.reloadAppByAppConfig(event, appConfig)
 		})
 
 		ipcMain.on(ChannelDefine.onClickedWorkspaceIconR2M, (event, arg) => {
 			const workspaceId = <string>(arg)
-
 			const appConfigRepository = new AppConfigRepository()
-			const [appConfig,] : [AppConfig, boolean] = appConfigRepository.load(AppConfigFileName)
+			const appConfig = appConfigRepository.load(AppConfigFileName)
 			const workspaceConfig = appConfig.findWorkspaceConfigById(workspaceId)
 			if(workspaceConfig != null){
 				this.currentWorkspaceId = workspaceId
@@ -184,12 +184,10 @@ export class IndexMainProcess {
 	}
 
 	getCurrentWorkspaceConfig(): WorkspaceConfig | null {
-		const appConfigRepository = new AppConfigRepository()
-		const [appConfig, success] : [AppConfig, boolean] = appConfigRepository.load(AppConfigFileName)
-		if(!success){
-			appConfigRepository.save(AppConfigFileName,  AppConfig.default)
-		}
-		const workspaceConfig = appConfig.findWorkspaceConfigById(this.currentWorkspaceId)
+		const workspaceConfig =
+			new AppConfigRepository()
+				.load(AppConfigFileName)
+				.findWorkspaceConfigById(this.currentWorkspaceId)
 		return workspaceConfig
 	}
 
