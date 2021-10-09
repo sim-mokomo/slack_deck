@@ -153,25 +153,11 @@ function AddSlackColumn(url:string , id:number){
 }
 
 function updateSlackColumnPositionReply() {
-	const [xPosList,yPosList,widthList,heightList] = getSlackColumnViewDomRects()
-	const rectangleList : Electron.Rectangle[] = []
-	for(let i = 0; i < xPosList.length; i++){
-		rectangleList.push({
-			x: Math.round(xPosList[i]) ,
-			y: Math.round(yPosList[i]) ,
-			width: Math.round(widthList[i]) ,
-			height: Math.round(heightList[i])
-		})
-	}
-	window.api.updateSlackColumnPositionR2M(rectangleList)
+	window.api.updateSlackColumnPositionR2M(getSlackColumnViewDomRects())
 }
 
-function getSlackColumnViewDomRects() : [number[], number[], number[], number[]]{
-	const xPosList :number[] = []
-	const yPosList :number[] = []
-	const widthList :number[] = []
-	const heightList :number[] = []
-	slackWorkspaceView.getColumns().forEach(x => {
+function getSlackColumnViewDomRects() : Electron.Rectangle[] {
+	const columnRectangleList = slackWorkspaceView.getColumns().map(x => {
 		const rect = x.getDOM().getBoundingClientRect()
 		const y = x.isHomeColumn() ?
 			rect.y:
@@ -179,14 +165,12 @@ function getSlackColumnViewDomRects() : [number[], number[], number[], number[]]
 		const height = x.isHomeColumn() ?
 			rect.height:
 			rect.height - x.getHeaderHeight()
-		xPosList.push(rect.x)
-		yPosList.push(y)
-		widthList.push(rect.width)
-		heightList.push(height)
+		return {
+			x: Math.round(rect.x),
+			y: Math.round(y),
+			width: Math.round(rect.width),
+			height: Math.round(height)
+		}
 	})
-	console.log(xPosList)
-	console.log(yPosList)
-	console.log(widthList)
-	console.log(heightList)
-	return [xPosList,yPosList,widthList,heightList]
+	return columnRectangleList
 }
