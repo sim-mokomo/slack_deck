@@ -30,7 +30,7 @@ test("読み込みテスト", ()=>{
 
     const appConfigRepository = new AppConfigRepository()
     appConfigRepository.save(saveFileName, testAppConfig)
-    const [appConfig,] : [AppConfig, boolean] = appConfigRepository.load(saveFileName)
+    const appConfig = appConfigRepository.load(saveFileName)
     fs.unlinkSync(saveFileName)
 
     expect(appConfig.workspaces[0].workspace_id).toBe(testWorkspaceId)
