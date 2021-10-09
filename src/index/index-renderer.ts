@@ -1,11 +1,16 @@
 class SlackWorkspaceViewModel
 {
 	private columnViews : SlackColumnView[] = []
+	private slackColumnContainerDOM : Element | null = null
+	onLoadWindow(document:Document){
+		this.slackColumnContainerDOM = document.getElementsByClassName("webview-container")[0]
+	}
 
 	getColumns() { return this.columnViews }
 
 	addColumn(columnModel: SlackColumnView){
 		this.columnViews.push(columnModel)
+		this.slackColumnContainerDOM?.appendChild(columnModel.getColumnContainerDOM())
 	}
 
 	getColumn(id:number){
@@ -13,12 +18,19 @@ class SlackWorkspaceViewModel
 	}
 
 	removeColumn(id:number){
+		const removeSlackColumn = this.columnViews.find(x => x.getId() == id)
+		if(!removeSlackColumn){
+			return
+		}
 		this.columnViews = this.columnViews.filter(x => x.getId() != id)
+		this.slackColumnContainerDOM?.removeChild(removeSlackColumn.getColumnContainerDOM())
 	}
 
 	removeAll(){
-		// todo: viewと分離させる
 		this.columnViews = []
+		while(this.slackColumnContainerDOM?.firstChild){
+			this.slackColumnContainerDOM?.removeChild(this.slackColumnContainerDOM?.firstChild)
+		}
 	}
 }
 
@@ -57,13 +69,10 @@ class SlackColumnView
 		}
 	}
 
-	getDOM(){return this.webviewItemDOM}
+	getColumnContainerDOM(){return this.webviewItemDOM}
 	getColumnBodyDOM(){return this.columnBodyDOM}
 	getId(){return this.id}
 	isHomeColumn() : boolean { return this.id == 0}
-	getHeaderHeight(){
-		return this.headerDOM.getBoundingClientRect().height
-	}
 }
 
 const slackWorkspaceView = new SlackWorkspaceViewModel()
@@ -105,15 +114,10 @@ window.onload = () => {
 	if(reloadWorkspaceButtonDOM != null){
 		reloadWorkspaceButtonDOM.addEventListener("click", () => {
 			window.api.reloadAppR2M()
-			// todo: リロードリプライをもらって表示を更新する
 		})
 	}
 
 	window.api.reloadAppM2R(request => {
-		const webViewContainerDOM = document.getElementsByClassName("webview-container")[0]
-		while(webViewContainerDOM.firstChild){
-			webViewContainerDOM.removeChild(webViewContainerDOM.firstChild)
-		}
 		slackWorkspaceView.removeAll()
 
 		request.columnViewInfoList.forEach(x => {
@@ -136,24 +140,21 @@ window.onload = () => {
 		}
 	})
 
+	slackWorkspaceView.onLoadWindow(document)
 	window.api.onInitializeIndexR2M()
 }
 
 function AddSlackColumn(url:string , id:number){
-	const webviewContainerDOM = document.getElementsByClassName("webview-container",)[0]
 	const column = new SlackColumnView(id, (self) => {
 		const column = slackWorkspaceView.getColumn(self.getId())
 		if(column != null){
 			window.api.removeSlackColumnR2M(self.getId())
 			slackWorkspaceView.removeColumn(self.getId())
-			webviewContainerDOM.removeChild(self.getDOM())
 			updateSlackColumnPositionReply()
 		}
 	})
 
 	slackWorkspaceView.addColumn(column)
-	webviewContainerDOM.appendChild(column.getDOM())
-
 	window.api.onAddedSlackColumnR2M(url)
 }
 
