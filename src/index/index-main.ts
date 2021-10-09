@@ -74,8 +74,6 @@ export class IndexMainProcess {
 					)
 				)
 
-				console.log(requests)
-				console.log(requests[0])
 				this.addSlackColumnReply(event, requests)
 			}
 		})
@@ -142,7 +140,6 @@ export class IndexMainProcess {
 		})
 
 		ipcMain.on(ChannelDefine.updateSlackColumnPositionR2M, (event, rectangleList: Electron.Rectangle[]) => {
-			console.log(this.workspaceModel.getColumnNum())
 			this.workspaceModel.getColumns().forEach((column, i) => {
 				column.setSize(rectangleList[i])
 			})
