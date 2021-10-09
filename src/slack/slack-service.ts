@@ -35,9 +35,6 @@ export class SlackService {
 	}
 
 	static parseUrl(url: string): [channelId: string, threadId: string] {
-		// note: [channel url] https://<team-name>.slack.com/archives/<channel_id>
-		// note: [thread url] https://<team-name>.slack.com/archives/<channel_id>/<thread_ts>?thread_ts=<value>&cid=<value>
-
 		const channelUrlRegex = /https:\/\/.+\/archives\/.+/
 		const isChannelUrl = channelUrlRegex.exec(url) != null
 
