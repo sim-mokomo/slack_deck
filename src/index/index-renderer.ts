@@ -26,20 +26,24 @@ class SlackColumnView
 {
 	private readonly webviewItemDOM : HTMLDivElement
 	private readonly headerDOM : HTMLDivElement
+	private readonly columnBodyDOM : HTMLDivElement
 	private readonly id : number
 
 	constructor(id:number, closeAction: (self:SlackColumnView) => void) {
+		this.id = id
 		this.webviewItemDOM = document.createElement("div")
 		this.webviewItemDOM.setAttribute("class", "webview-item")
 		this.headerDOM = document.createElement("div")
 		this.headerDOM.setAttribute("class", "slack-column-header")
-		this.webviewItemDOM.appendChild(this.headerDOM)
-
-		this.id = id
-		if(id == 0){
+		this.columnBodyDOM = document.createElement("div")
+		this.columnBodyDOM.setAttribute("class", "slack-column-body")
+		if(this.isHomeColumn()){
 			// todo: widthを設定から変えることができるように
 			this.webviewItemDOM.setAttribute("style", "min-width:800px;")
+			this.webviewItemDOM.appendChild(this.columnBodyDOM)
 		}else{
+			this.webviewItemDOM.appendChild(this.headerDOM)
+			this.webviewItemDOM.appendChild(this.columnBodyDOM)
 			this.webviewItemDOM.setAttribute("style", "min-width:400px;")
 
 			const closeButtonDOM = document.createElement("button")
@@ -54,6 +58,7 @@ class SlackColumnView
 	}
 
 	getDOM(){return this.webviewItemDOM}
+	getColumnBodyDOM(){return this.columnBodyDOM}
 	getId(){return this.id}
 	isHomeColumn() : boolean { return this.id == 0}
 	getHeaderHeight(){
@@ -158,18 +163,12 @@ function updateSlackColumnPositionReply() {
 
 function getSlackColumnViewDomRects() : Electron.Rectangle[] {
 	const columnRectangleList = slackWorkspaceView.getColumns().map(x => {
-		const rect = x.getDOM().getBoundingClientRect()
-		const y = x.isHomeColumn() ?
-			rect.y:
-			rect.y + x.getHeaderHeight()
-		const height = x.isHomeColumn() ?
-			rect.height:
-			rect.height - x.getHeaderHeight()
+		const rect = x.getColumnBodyDOM().getBoundingClientRect()
 		return {
 			x: Math.round(rect.x),
-			y: Math.round(y),
+			y: Math.round(rect.y),
 			width: Math.round(rect.width),
-			height: Math.round(height)
+			height: Math.round(rect.height)
 		}
 	})
 	return columnRectangleList
