@@ -1,4 +1,39 @@
 // todo: バンドラツールを使用してファイル分けを行えるようにする
+class SlackWorkspaceHtmlPresenter {
+	private readonly slackWorkspaceView : SlackWorkspaceHtmlView
+
+	constructor(slackWorkspaceView: SlackWorkspaceHtmlView) {
+		this.slackWorkspaceView = slackWorkspaceView
+	}
+
+	addWorkspaceIcon(workspaceId:string) : void {
+		this.slackWorkspaceView.addWorkspaceIcon(workspaceId)
+	}
+
+	addSlackColumn(url:string , id:number){
+		const column = new SlackColumnHtmlView(id, (self) => {
+			const column = this.slackWorkspaceView.getColumn(self.getId())
+			if(column == null){
+				return
+			}
+			window.api.removeSlackColumnR2M(self.getId())
+			this.slackWorkspaceView.removeColumn(self.getId())
+			this.updateSlackColumnPositionReply()
+		})
+
+		this.slackWorkspaceView.addColumn(column)
+		window.api.onAddedSlackColumnR2M(url)
+	}
+
+	removeAll() : void {
+		this.slackWorkspaceView.removeAll()
+	}
+
+	updateSlackColumnPositionReply() {
+		window.api.updateSlackColumnPositionR2M(this.slackWorkspaceView.getSlackColumnViewDomRects())
+	}
+}
+
 class SlackWorkspaceHtmlView
 {
 	private columnViews : SlackColumnHtmlView[] = []
@@ -46,8 +81,6 @@ class SlackWorkspaceHtmlView
 		this.workspaceIconContainer.appendChild(workspaceIconButtonDOM)
 	}
 
-	getColumns() { return this.columnViews }
-
 	addColumn(columnModel: SlackColumnHtmlView){
 		this.columnViews.push(columnModel)
 		this.slackColumnContainerDOM.appendChild(columnModel.getColumnContainerDOM())
@@ -74,6 +107,10 @@ class SlackWorkspaceHtmlView
 		while(this.workspaceIconContainer.firstChild){
 			this.workspaceIconContainer.removeChild(this.workspaceIconContainer.firstChild)
 		}
+	}
+
+	getSlackColumnViewDomRects() : Electron.Rectangle[] {
+		return this.columnViews.map(x => x.getColumnBodyRect())
 	}
 }
 
@@ -113,9 +150,17 @@ class SlackColumnHtmlView
 	}
 
 	getColumnContainerDOM(){return this.webviewItemDOM}
-	getColumnBodyDOM(){return this.columnBodyDOM}
 	getId(){return this.id}
 	isHomeColumn() : boolean { return this.id == 0}
+	getColumnBodyRect(): Electron.Rectangle {
+		const rect = this.columnBodyDOM.getBoundingClientRect()
+		return {
+			x: Math.round(rect.x),
+			y: Math.round(rect.y),
+			width: Math.round(rect.width),
+			height: Math.round(rect.height)
+		}
+	}
 }
 
 window.onload = () => {
@@ -130,67 +175,37 @@ window.onload = () => {
 		workspaceId => {
 			window.api.onClickedWorkspaceIconR2M(workspaceId)
 		})
+	const slackWorkspacePresenter = new SlackWorkspaceHtmlPresenter(slackWorkspaceView)
 	window.addEventListener("scroll", ()=>{
-		updateSlackColumnPositionReply()
+		slackWorkspacePresenter.updateSlackColumnPositionReply()
 	})
 
 	window.api.addSlackColumnM2R(requestList  => {
 		requestList.forEach(x => {
-			AddSlackColumn(x.columnViewInfo.url, x.columnViewInfo.id)
+			slackWorkspacePresenter.addSlackColumn(x.columnViewInfo.url,x.columnViewInfo.id)
 		})
 	})
 	window.api.addWorkspaceIconM2R(workspaceIdList => {
-		workspaceIdList.forEach(id => slackWorkspaceView.addWorkspaceIcon(id))
+		workspaceIdList.forEach(id => slackWorkspacePresenter.addWorkspaceIcon(id))
 	})
 
 	window.api.updateSlackColumnPositionM2R(()=>{
-		updateSlackColumnPositionReply()
+		slackWorkspacePresenter.updateSlackColumnPositionReply()
 	})
 
 	window.api.reloadAppM2R(request => {
-		slackWorkspaceView.removeAll()
+		slackWorkspacePresenter.removeAll()
 
 		request.columnViewInfoList.forEach(x => {
-			AddSlackColumn(x.url, x.id)
+			slackWorkspacePresenter.addSlackColumn(x.url,x.id)
 		})
 
 		request.workspaceIconInfoList.forEach(x => {
-			slackWorkspaceView.addWorkspaceIcon(x.workspaceId)
+			slackWorkspacePresenter.addWorkspaceIcon(x.workspaceId)
 		})
 
-		updateSlackColumnPositionReply()
+		slackWorkspacePresenter.updateSlackColumnPositionReply()
 	})
 
 	window.api.onInitializeIndexR2M()
-
-	function AddSlackColumn(url:string , id:number){
-		const column = new SlackColumnHtmlView(id, (self) => {
-			const column = slackWorkspaceView.getColumn(self.getId())
-			if(column != null){
-				window.api.removeSlackColumnR2M(self.getId())
-				slackWorkspaceView.removeColumn(self.getId())
-				updateSlackColumnPositionReply()
-			}
-		})
-
-		slackWorkspaceView.addColumn(column)
-		window.api.onAddedSlackColumnR2M(url)
-	}
-
-	function updateSlackColumnPositionReply() {
-		window.api.updateSlackColumnPositionR2M(getSlackColumnViewDomRects())
-	}
-
-	function getSlackColumnViewDomRects() : Electron.Rectangle[] {
-		const columnRectangleList = slackWorkspaceView.getColumns().map(x => {
-			const rect = x.getColumnBodyDOM().getBoundingClientRect()
-			return {
-				x: Math.round(rect.x),
-				y: Math.round(rect.y),
-				width: Math.round(rect.width),
-				height: Math.round(rect.height)
-			}
-		})
-		return columnRectangleList
-	}
 }
